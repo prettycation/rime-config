@@ -1,0 +1,27 @@
+# @format
+
+# Rime dictionary
+# encoding: utf-8
+# ------ 转文词库 ------
+---
+name: zhuanwen
+version: "LTS"
+sort: by_weight
+...
+榛树	zhēn;mq shù;md	10
+行山踏海	xíng;xd,xi shān;aa tà;zt hǎi;dm	10
+神官赐福	shén;uu guān;bg,bk cì;by fú;uf,ut	10
+长谈不倦	cháng;pd tán;yy bù;ad,ax juàn;rj	10
+鹿覆蕉叶	lù;gb,lb fù;xf jiāo;cj yè;ku	10
+鹤衔春雪	hè;nv xián;xi,xj chūn;of,fo xuě;yx	10
+长谈不厌	cháng;pd tán;yy bù;ad,ax yàn;iq,qi	10
+如椒似漆	rú;nk jiāo;mu sì;ry qī;dq,du	10
+远渡岁月	yuǎn;zy dù;dd suì;ux yuè;oy,pa	10
+华饰	huá;uh shì;uj	10
+拊膺	fǔ;ff yīng;go,ov	10
+苏澜城	sū;cb lán;dl chéng;ti	10
+苏澜桥	sū;cb lán;dl qiáo;mq	10
+山河不改	shān;aa hé;dk bù;ad,ax gǎi;wj,jw	10
+韶华绵延	sháo;yv huá;uh mián;sb,sj yán;zv	10
+浮生缥缈	fú;df shēng;na piāo;sp miǎo;sm	10
+长乐亦未央	cháng;pd lè;pd,px yì;wb wèi;ex,ad yāng;ad,kd	10

@@ -1,0 +1,427 @@
+patch:
+  speller/algebra:
+    __patch:
+      #- 模糊音                                  # 这里启用后，本文件末尾可配置具体条目
+      - wanxiang_algebra:/pro/小鹤双拼 # 可选输入方案名称：自然码, 自然龙, 小鹤双拼, 搜狗双拼, 微软双拼, 智能ABC, 紫光双拼, 国标双拼
+      - wanxiang_algebra:/pro/直接辅助 #辅助码升级为：直接辅助和间接辅助两种类型，都是句中任意，不同点在于直接辅助是nire=你  而间接则需要/引导  ni/re=你 ，在这个基础上直接辅助支持拼音后任意位置数字声调参与，间接辅助声调在/引导前参与
+      - 小鹤双拼提权 #本文件末尾，有自然码和小鹤的可以用
+      - 小鹤双拼飞键
+  ##########################以上格式受指令初始化控制，最好保持格式不变，如果发生变更请不要使用指令修改相关数据#####################################
+
+  # # 把并击基础对象挂进 patch
+  # __patch:
+  #   - 并击基础
+  #
+  # "engine/processors/@before 3": chord_composer
+  #
+  # # 把并击的 algebra 规则按模块拼起来
+  # chord_composer/algebra:
+  #   __patch:
+  #     - 并击预处理
+  #     - 并击字母
+  #     - 并击大写
+  #     - 并击符号
+  #     - 并击清理
+
+  # 开关
+  # reset: 默认状态。注释掉后，切换窗口时不会重置到默认状态。
+  # states: 方案选单显示的名称。可以注释掉，仍可以通过快捷键切换。
+  # abbrev: 默认的缩写取 states 的第一个字符，abbrev 可自定义一个字符
+  switches/@1/reset: 0 # 默认中文标点
+  switches/@2/reset: 0 # 默认半角字符
+  switches/@3/reset: 0 # 关闭表情候选
+  switches/@4/reset: 0 # 关闭翻译候选
+  switches/@5/reset: 1 # 开启候选辅助码拆分
+  switches/@6/reset: 1 # 开启小字集
+  switches/@7/reset: 1 # 开启tips提示
+  switches/@8/reset: 1 # 开启预测功能
+  switches/@9/reset: 0 # 显示原编码
+  switches/@10/reset: 1 # 开启候选辅助码注释
+  switches/@11/reset: 0 # 默认简体
+  switches/@12/reset: 1 # 开启简码
+  switches/@13/reset: 0 # 词组优先
+
+  #通过下面的设置可以让你自己的文件引入而与仓库custom_phrase.txt不同，防止更新时被仓库文件覆盖
+  custom_phrase/user_dict: custom_phrase01 # 这里改成什么就需要手动创建同名的 custom_phrasexx.txt 文件在用户目录，这个文件主要用于置顶，编码为自定义编码的词汇
+  translator/packs/+:
+    - "moe" #导入根目录下xx.dict.yaml作为自定义固定词典，名称为name字段的值，编码要与固定词库一致，编码权重都不要少，形如姓名、专有名词公司名称等等
+
+  # 输入引擎
+  # 使用 *文件名*对象名 的语法直接加载 Lua 插件
+
+  # rime-trans 翻译插件
+  # 挂载处理器 (处理快捷键)
+  "engine/processors/@next": lua_processor@*input_text*processor
+
+  # 在去重前挂载过滤器 (生成翻译候选词)
+  "engine/filters/@before 7": lua_filter@*input_text*filter
+
+  grammar:
+    language: wanxiang-lts-zh-hans
+    collocation_max_length: 8
+    collocation_min_length: 3
+    collocation_penalty: -10
+    non_collocation_penalty: -17
+    rear_penalty: -18
+    weak_collocation_penalty: -24
+
+  user_predict:
+    enable_post_predict: true # 引擎 A：是否开启上屏后的联想预测
+    enable_context_reorder: true # 引擎 B：是否开启输入过程中的实时上下文调频
+    max_candidates: 5 # 候选栏中最多显示的联想词数量
+    max_predictions: 3 # 级联深度：允许连续自动预测的最大跳数
+    expiry_days: 90 # 物理生命周期：超 90 天未使用的 1/2-Gram 将被销毁
+    activation_days: 7 # 激活锁：新词若 7 天内不再使用，将被视为噪音冷冻
+    decay_rate: 0.85 # 遗忘衰减率：数值越小，旧词权重掉得越快
+    context_timeout: 5000 # 语境熔断 (ms)：停顿超 5 秒自动切断上下文，防远距离穿透
+    enable_predict_space: false # 键盘双模式 AB 面开关
+    db_name: "lua/predict"
+  # 模式 B (默认 false，沉浸预测流)：Space 空格键交由 Rime 原生系统顺滑选词；按下 Tab、→、\ 或 Alt 等替身键时，打断联想并强制输出物理空格。
+
+  # 模式 A (true，精准空格流)：Space 强制打断联想并输出物理空格；替身键仅作纯粹的打断清空。
+
+  # Tips 配置项
+  "super_tips/disabled_types/+":
+    - "化学式"
+    - "车牌"
+    # 禁用的 tips 类型，初始化 tips 数据库的时候会直接忽略相关规则，修改部署后生效
+    # 可选项为：偏旁，符号，化学式，时间，符号，组字，翻译，表情，货币，车牌
+
+  # 将分词符指向一个不常用的按键（冒号）,第一位为视觉分词符，第二位为手动分词符
+  speller/delimiter: "':"
+  # 视觉分词符指向单引号，visual_delimiter 的处理依赖于预编辑区转换功能的开启状态。当 switches/@8/reset: 0 时，注释功能关闭，导致预编辑区处理被跳过。
+  # speller/visual_delimiter: "'"
+  # 第一处分词时替换滤镜 xform 还没生效，还是会显示 “：”
+  # translator/preedit_format:
+  #   - "xform/:/'/"
+
+  # 关闭数字后自动半角功能
+  punctuator/digit_separators: commit
+  #下面是候选数量，未来7890分别代表1234声，请候选长度不要大于6避免冲突
+
+  #下面是超级注释相关
+  # 超级注释模块，子项配置 true 开启，false 关闭
+  "super_comment/candidate_length": 6 # 候选词辅助码提醒的生效长度，0为关闭  但同时清空其它，应当使用上面开关来处理
+  "super_comment/corrector_type": "comment" # 错音措字，随意更换左右括号，比如"〔comment〕" 不加括号为无括号，comment占位不能动
+  "super_comment/chaifen": "chaifen" # 拆分显示，随意更换左右括号，比如"〔chaifen〕" 不加括号为无括号，chaifen占位不能动
+  "super_comment/cand_type/sentence": "∞"
+  "super_comment/cand_type/predict": "*"
+  "super_comment/cand_type/user_table": "⌥" # 自定义短语
+  "super_comment/cand_type/completion": "☯" # 长词联想
+  "super_comment/cand_type/abbrev": "ϟ" # 简码
+  "super_comment/cand_type/fallback": "~"
+  # phrase: ""                  # cn词库里的词
+  # table: ""                   # mix词库里的词
+
+  # 字符集过滤lua
+  # a,通用规范汉字表
+  # b,GB2312,
+  # g,GBK,
+  # T,Big5,(台港澳常用)
+  # j,简体,OpenCC (t2s)
+  # f,通用繁体,OpenCC (s2t)
+  # h,香港繁体, OpenCC (s2hk)
+  # t,台湾繁体, OpenCC (s2tw)
+  # u,基本区,U+4E00 - U+9FFF
+  # A-I,扩展 A-I 区,U+3400 及各扩展区 (支持到 Ext-I)
+  # c,兼容区汉字
+  # 你可以通过黑白名单微调你自己每个开关下面的字符集过滤清单，主数据库位于lua/charset.reverse.bin不可编辑
+  # 你可以按上面提到的规则代号在base处填写上基础集，还可以在每一个开关的开白名单设置微调数据，就像默认添加的字符集过滤在8105基础上新增了一些
+  # 你可以定义多个开关，多个开启状态的开关求并集，比如charset_filter开着，s2hk也开着，那么就会显示这两个集合的所有汉字
+  # 优雅的地方在于s2hk开着，charset_filter关着 我们照样能使用 港繁能用到的所有字，是真正的本体，无关字会被过滤，而当都开着则是享受简体转换成繁体的后的结果
+  # 这个设计真正的兼容了简繁转换与字符集过滤的矛盾，还能满足用户多种自定义需求，你可以在开关增加类别，并在charset下面新增option类去选择按照字区去过滤，等多种组合方式
+  "charset/+":
+    - option: charset_filter
+      base: aj #可以填入多个类别如aj
+      addlist:
+        - "诶濛硷氽尛躝〇冇吔咗囧屌鲶芶咲畑垅燐"
+      blacklist: [鹵, 彔, 䵽, 䌬, 罿, 繱, 総]
+
+  #下面用于对/rq和N20250101这样的日期候选自定义（顺序、类型、候选个数）由你完全掌控，前面是对于公历后面默认携带农历
+  # 通用日期时间格式化函数（供 /rq、/sj、/dt、N0101、N20150101 场景复用）
+  # 支持转义：
+  #   \X       —— 转义单个字符 X，按字面量输出（如 \Y \m \H 等）
+  #   [[...]]  —— 区块整体按字面量输出
+  #
+  # 约定占位符：
+  # 【日期】
+  #   Y  四位年份           0000-9999  例：2025
+  #   y  两位年份           00-99      例：25
+  #   m  月（前导零）        01-12      例：02
+  #   n  月（不带前导零）     1-12       例：2
+  #   d  日（前导零）        01-31      例：09
+  #   j  日（不带前导零）     1-31       例：9
+  #
+  # 【时间】
+  #   H  24小时（前导零）   00-23      例：08
+  #   G  24小时（不带零）   0-23       例：8
+  #   I  12小时（前导零）   01-12      例：08
+  #   l  12小时（不带零）   1-12       例：8   （注意是小写 L）
+  #   M  分钟（前导零）     00-59      例：05
+  #   S  秒（前导零）       00-59      例：09
+  #   p  am/pm（小写）     am / pm
+  #   P  AM/PM（大写）     AM / PM
+  # 【时区】
+  #   O  带冒号格式        +08:00、-04:30、+05:45
+  #   o  不带冒号格式      +0800、-0430、+0545
+  # date_formats:
+  #   - "Y年m月d日"
+
+  # time_formats:
+  #   - "H:M"
+
+  # datetime_formats:
+  # - "Y-m-d H:M:S"
+
+  #下面用来改变你的windows小狼毫右下角软件图标
+  #schema/+:
+  #  icon: "icons/zhong.ico"
+  #  ascii_icon: "icons/ying.ico"
+
+  #下面这个可以改变tips上屏的按键
+  super_tips/tips_key: "comma" #修改时候去default找，默认是逗号
+
+  # super_sequence/sequence: # Lua 配置：手动排序的快捷键 super_sequence.lua，不要用方向键，各种冲突，一定要避免冲突
+  #   up: "Control+j" # 上移
+  #   down: "Control+k" # 下移
+  #   reset: "Control+l" # 重置
+  #   pin: "Control+p" # 置顶
+
+  #英文自动加空格
+  #off: 关闭; before: 总是前加; after: 总是后加;
+  wanxiang_english/english_spacing: "off"
+
+  key_binder/bindings/+: # 追加
+    # 翻页键设置
+    - { accept: minus, send: Page_Up, when: paging }
+    - { accept: equal, send: Page_Down, when: has_menu }
+    # 次选和三选
+    - { accept: semicolon, send: 2, when: has_menu } # 分号次选
+    - { accept: apostrophe, send: 3, when: has_menu } # 单引号三选
+
+  # 快符功能：
+  # a/、单字母组合，触发预设编码自动上屏快符，支持将值设为"repeat" 以支持对应按键重复上屏功能，custom>schema>lua最终合并键值
+  # 现在就支持26字母快符，结合成对符号输入，这边的压力小一些
+  # quick_symbol_text:
+  #   trigger: "^([a-z])/$"
+  #   symkey:
+  #     q: "repeat"
+  #     ......
+
+  #通过在有候选的情况下，通过末尾检测到形如\a来触发为第一候选进行成对符号包裹例如nihao\c 候选[你好]
+  #trigger只能设置为单符号，因为按下一次锁定第一候选，按下映射开始包裹符号pro用户不能设置为/
+  #两个字符可以不用|默认前后分割，需要明确区分前后的使用|分割，可以有一侧为空，不可以使用多个||
+  # paired_symbols:
+  #   #sort_window: 10
+  #   trigger: "\\" #(注意反斜杠这是转义写法\\使用时\单反斜杠即可)
+  #   mirror: true #包裹后完全替换第一候选true,原候选后移到第二false
+  #   symkey:
+  #     # ===== 基本括号与引号 =====
+  #     a: "[]" # 方括号
+
+  # # ===== 扩展括号族 / 引号 =====
+  # dy: "''" # 英文单引号
+
+  # # ===== 双字母括号族 =====
+  # aa: "〚〛" # 双中括号
+
+  # # ===== Markdown / 标记 =====
+  # md: "**|**" # Markdown 粗体
+
+  # # ===== 运算与标记符 =====
+  # pl: "++"
+
+  #开启自动无词频造词（默认已经开了）
+  #add_user_dict/enable_auto_phrase: true
+
+#下面的数据有需要的可以patch引用
+#特殊优化：部分音节字极少，几乎不参与构词，则提升对应四码字的优先级，仅对小鹤双拼有效，其他双拼方案需作对应修改）
+小鹤双拼提权:
+  __append:
+    - derive/^(.*?)(\d?);(bl|dx|df|eg|fn|kw|ny|tw|vw|yd|rx|fs|ix)$/$1$3/
+    - derive/^(.*?)(\d?);.*?,(bl|dx|df|eg|fn|kw|ny|tw|vw|yd|rx|fs|ix)$/$1$3/
+
+#特殊优化：部分音节字极少，几乎不参与构词，则提升对应四码字的优先级，仅对自然码有效，其他双拼方案需作对应修改）
+自然码提权:
+  __append:
+    - derive/^(.*?)(\d?);(jb|wq|aq|av|dn|xh|bv|jz|hm|sn|cd|iw|xl|ak|zy|fy|uz|yx|wb|wr|yw|dz|qz|ms|at|xf|gi|gn|or|ux|ww|nw|fs|qk|rl|cq|sw|jv|cy|sq|dd|fp|ae|ix|td|ep|ar|wm|pd|et|yz|eh|ct|os|hx|zq|ew|fm|ab|kc|tf|fx|we|sz|wx|bq|ic|ez|bs|ej|oh|ps|pw|fr|pq|au|wc|wp|dt|qf|zc|vx|im|br|mw|un|qb|fi|zm|vn|oz|kt|rq|ay|fn|yc|um|eq|eu|cz|yq|tq|oi|ek|az|fv|zx|ut|vz|ry|ac|ws|af|qv|ea|qj|al|ol|on|sx|ap|df|eg|rz|ey|em|ag|hi|iz|ki|xz|xj|ad|ft|pt|op|vt|oj|kn|pr|hq|eb|ev|cx|zd|am|ov|oq|ym|ef|ot|mr|rd|sy|oc|rc|oe|fq|cn|ok|rn|bp|yv|uc|wk|oy|bt|je|ow|xg|jj|rw|pp|ja|wt|lf|xe|wy|kx|sm|qe|fw|gc|xa|cw|zn|tn|cc|jo|md|sd|ql|kq|it|bd|sc|wv|fc|dw|ob|vm|ed|jl|xo|fl|gq|gt|of|pv|wd|qa|xk|yd|fe|og|iq|oa|uq|om|xv|mv|as|ox|km|zt|od|ht|el|hn|st|wn|mt|wi|tz|aj|yg|bw|jf|jg|kz|es|xb|ax|rt|gx|bb|qo|yf|ex|rx|tt|us|qg|pe|zw|mp|qh|rm|hc|np|jh|cm|yl|eo|ra|vc|aw|tw|fk|gm|ec|be|vq|fd|jk|in)$/$1$3/
+    - derive/^(.*?)(\d?);.*?,(jb|wq|aq|av|dn|xh|bv|jz|hm|sn|cd|iw|xl|ak|zy|fy|uz|yx|wb|wr|yw|dz|qz|ms|at|xf|gi|gn|or|ux|ww|nw|fs|qk|rl|cq|sw|jv|cy|sq|dd|fp|ae|ix|td|ep|ar|wm|pd|et|yz|eh|ct|os|hx|zq|ew|fm|ab|kc|tf|fx|we|sz|wx|bq|ic|ez|bs|ej|oh|ps|pw|fr|pq|au|wc|wp|dt|qf|zc|vx|im|br|mw|un|qb|fi|zm|vn|oz|kt|rq|ay|fn|yc|um|eq|eu|cz|yq|tq|oi|ek|az|fv|zx|ut|vz|ry|ac|ws|af|qv|ea|qj|al|ol|on|sx|ap|df|eg|rz|ey|em|ag|hi|iz|ki|xz|xj|ad|ft|pt|op|vt|oj|kn|pr|hq|eb|ev|cx|zd|am|ov|oq|ym|ef|ot|mr|rd|sy|oc|rc|oe|fq|cn|ok|rn|bp|yv|uc|wk|oy|bt|je|ow|xg|jj|rw|pp|ja|wt|lf|xe|wy|kx|sm|qe|fw|gc|xa|cw|zn|tn|cc|jo|md|sd|ql|kq|it|bd|sc|wv|fc|dw|ob|vm|ed|jl|xo|fl|gq|gt|of|pv|wd|qa|xk|yd|fe|og|iq|oa|uq|om|xv|mv|as|ox|km|zt|od|ht|el|hn|st|wn|mt|wi|tz|aj|yg|bw|jf|jg|kz|es|xb|ax|rt|gx|bb|qo|yf|ex|rx|tt|us|qg|pe|zw|mp|qh|rm|hc|np|jh|cm|yl|eo|ra|vc|aw|tw|fk|gm|ec|be|vq|fd|jk|in)$/$1$3/
+
+小鹤双拼飞键:
+  __append:
+    # cv -> ck
+    - derive/^cv(\d?)/ck$1/
+    # jp -> jf
+    - derive/^jp(\d?)/jf$1/
+    # mp ->mt
+    - derive/^mp(\d?)/mt$1/
+    # mz -> mr
+    - derive/^mz(\d?)/mr$1/
+    # po -> pe
+    - derive/^po(\d?)/pe$1/
+    # pz -> ps
+    - derive/^pz(\d?)/ps$1/
+    # qp -> qh
+    - derive/^qp(\d?)/qh$1/
+    # qx -> qj
+    - derive/^qx(\d?)/qj$1/
+    # rz -> rk
+    - derive/^rz(\d?)/rk$1/
+    # xq -> xo
+    - derive/^xq(\d?)/xo$1/
+    # zv -> zm
+    - derive/^zv(\d?)/zm$1/
+
+并击基础:
+  chord_composer:
+    # true：任意一个并击键先松开，就立刻结算本次并击
+    finish_chord_on_first_key_release: true
+
+    # 并击键位顺序表
+    # 并击最终会按这里的顺序排序，不是按手指按下顺序
+    # 后面的规则必须按这个顺序写，例如 wf 不能写成 fw
+    alphabet: qazwsxedcrfvtgbyhnujmik,ol.p;/
+
+并击预处理:
+  __append:
+    # 把 ; , . / 临时映射成 A C X Z
+    # 目的是避免这些符号在正则和 YAML 里造成转义/分隔干扰
+    - xlit|;,./|ACXZ|
+
+    # 左手并击包装成 <...>
+    # 例如 ef -> <ef>
+    - xform/([qwertasdfgzxcvb]+)/<$1>/
+
+    # 右手并击包装成 <...>
+    # 注意这里的 A C X Z 已经分别代表 ; , . /
+    - xform/([yuiophjklAnmCXZ]+)/<$1>/
+
+# 并击字母：普通小写输出
+并击字母:
+  __append:
+    # ---- 单键镜像区 ----
+
+    # 左右手对应位置输出同一个字母，降低左右手负担
+    - xform=(<q>|<p>)=q= # q 或 p -> q
+    - xform=(<w>|<o>)=w= # w 或 o -> w
+    - xform=(<e>|<i>)=e= # e 或 i -> e
+    - xform=(<r>|<u>)=r= # r 或 u -> r
+    - xform=(<t>|<y>)=t= # t 或 y -> t
+
+    - xform=(<a>|<A>)=a= # a 或 ; -> a
+    - xform=(<s>|<l>)=s= # s 或 l -> s
+    - xform=(<d>|<k>)=d= # d 或 k -> d
+    - xform=(<f>|<j>)=f= # f 或 j -> f
+    - xform=(<g>|<h>)=g= # g 或 h -> g
+
+    - xform=(<z>|<Z>)=z= # z 或 / -> z
+    - xform=(<x>|<X>)=x= # x 或 . -> x
+    - xform=(<c>|<C>)=c= # c 或 , -> c
+    - xform=(<v>|<m>)=v= # v 或 m -> v
+    - xform=(<b>|<n>)=b= # b 或 n -> b
+
+    # ---- 双键和弦区 ----
+    # 用常见双击组合补足剩余字母
+    # 左右两侧尽量做镜像，保持手感一致
+
+    # 上排补字母：y u i o p
+    - xform=(<ef>|<ji>)=y= # e+f 或 j+i -> y
+    - xform=(<er>|<ui>)=u= # e+r 或 u+i -> u
+    - xform=(<we>|<io>)=i= # w+e 或 i+o -> i
+    - xform=(<wr>|<uo>)=o= # w+r 或 u+o -> o
+    - xform=(<qr>|<up>)=p= # q+r 或 u+p -> p
+
+    # 中排补字母：h j k l
+    - xform=(<wf>|<jo>)=h= # w+f 或 j+o -> h
+    - xform=(<df>|<jk>)=j= # d+f 或 j+k -> j
+    - xform=(<sd>|<kl>)=k= # s+d 或 k+l -> k
+    - xform=(<sf>|<jl>)=l= # s+f 或 j+l -> l
+
+    # 边缘补字母：n m
+    - xform=(<af>|<jA>)=n= # a+f 或 j+; -> n
+    - xform=(<cv>|<mC>)=m= # c+v 或 m+, -> m
+
+# 并击大写：辅码/筛选用
+并击大写:
+  __append:
+    # 产出大写编码，和辅码、大写筛选联动
+    #
+    # 上排大写：Q W E R T Y U I O P
+    - xform=(<sef>|<jil>)=Q= # s+e+f 或 j+i+l -> Q
+    - xform=(<wt>|<yo>)=W= # w+t 或 y+o -> W
+    - xform=(<et>|<yi>)=R= # e+t 或 y+i -> R
+    - xform=(<ed>|<ik>)=E= # e+d 或 i+k -> E
+    - xform=(<qt>|<yp>)=T= # q+t 或 y+p -> T
+    - xform=(<qe>|<ip>)=Y= # q+e 或 i+p -> Y
+    - xform=(<ser>|<uil>)=U= # s+e+r 或 u+i+l -> U
+    - xform=(<wef>|<jio>)=I= # w+e+f 或 j+i+o -> I
+    - xform=(<aw>|<oA>)=O= # a+w 或 o+; -> O
+    - xform=(<qf>|<jp>)=P= # q+f 或 j+p -> P
+
+    # 中排大写：A S D F G H J K L
+    - xform=(<ar>|<uA>)=A= # a+r 或 u+; -> A
+    - xform=(<sr>|<ul>)=S= # s+r 或 u+l -> S
+    - xform=(<dr>|<uk>)=D= # d+r 或 u+k -> D
+    - xform=(<rf>|<uj>)=F= # r+f 或 u+j -> F
+    - xform=(<tg>|<yh>)=G= # t+g 或 y+h -> G
+    - xform=(<qwf>|<jop>)=H= # q+w+f 或 j+o+p -> H
+    - xform=(<dg>|<hk>)=J= # d+g 或 h+k -> J
+    - xform=(<sdf>|<jkl>)=K= # s+d+f 或 j+k+l -> K
+    - xform=(<asf>|<jlA>)=L= # a+s+f 或 j+l+; -> L
+
+    # 下排及补位大写：Z X C V B N M
+    - xform=(<zf>|<jZ>)=Z= # z+f 或 j+/ -> Z
+    - xform=(<xf>|<jX>)=X= # x+f 或 j+. -> X
+    - xform=(<asr>|<ulA>)=C= # a+s+r 或 u+l+; -> C
+    - xform=(<ac>|<mA>)=V= # a+c 或 m+; -> V
+    - xform=(<dc>|<mk>)=B= # d+c 或 m+k -> B
+    - xform=(<se>|<il>)=N= # s+e 或 i+l -> N
+    - xform=(<qw>|<op>)=M= # q+w 或 o+p -> M
+
+# 并击符号：直接出标点或配对符号
+并击符号:
+  __append:
+    # 常用符号
+    - xform=(<zx>|<XZ>)=!= # z+x 或 .+/ -> !
+    - xform=(<xc>|<CX>)=,= # x+c 或 ,+. -> ,
+    - xform=(<xv>|<mX>)=.= # x+v 或 m+. -> .
+    - xform=(<zv>|<mZ>)=?= # z+v 或 m+/ -> ?
+    - xform=(<zc>|<CZ>)=:= # z+c 或 ,+/ -> :
+    # - xform=(<kA>)=;= # k+; -> ;
+    - xform=(<as>)=/= # a+s -> /
+    - xform=(<lA>)=;= # l+; -> ;
+    - xform=(<ad>)=\= # a+d -> \
+    - xform=(<ml>)=@= # m+l -> @
+    - xform=(<sc>)=~= # s+c -> ~
+    - xform=(<fg>)=*= # f+g -> *
+    - xform=(<hj>)=+= # h+j -> +
+    - xform=(<yu>)=-= # y+u -> -
+    - xform=(<rt>)=%= # r+t -> %
+    - xform=(<rg>)=^= # r+g -> ^
+    - xform=(<hu>)=#= # h+u -> #
+
+    # 括号 / 引号 / 成组符号区
+    - xform=(<ag>)=[= # a+g -> [
+    - xform=(<hA>)=]= # h+; -> ]
+    - xform=(<vb>)=“= # v+b -> 左双引号
+    - xform=(<nm>)=”= # n+m -> 右双引号
+    - xform=(<wd>)=:“= # w+d -> :“
+    - xform=(<ko>)=,“= # k+o -> ,“
+
+# 并击清理：收尾、兜底、防脏码
+并击清理:
+  __append:
+    # 个别特殊残留的收尾处理
+    - xform/<1>/ /
+    - xform/<"1>/"/
+
+    # 如果还有没被识别掉的 <...> 并击串，直接清空
+    # 防止脏码继续流入后面的双拼/辅码链
+    - xform/^.*<.+>.*$//
+
+    # 符号后处理
+    # 把前面转义保护过的结果还原成最终标点
+    - xform=，="""",=
+    - xform=。="""".=
+    - xform=！=""""!=
+    - xform=？=""""?=
