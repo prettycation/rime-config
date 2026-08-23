@@ -1,0 +1,270 @@
+name: Sync Assets to WebDAV
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # 每天UTC时间2点自动运行
+  workflow_dispatch: # 支持手动触发
+  push:
+    branches:
+      - main # 推送到 main 时触发（正式环境）
+      - "CI/**" # 推送到 CI/* 分支时触发（测试环境）
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 允许提交代码
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jq unzip curl
+
+      - name: Install rclone
+        run: |
+          curl -sL https://rclone.org/install.sh | sudo bash
+
+      - name: Sync assets and push to WebDAV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBDAV_URL: ${{ secrets.WEBDAV_URL }}
+          WEBDAV_USERNAME: ${{ secrets.WEBDAV_USERNAME }}
+          WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+
+          # ============================================
+          # 初始化
+          # ============================================
+          SHA_DIR=".github/sync/sha"
+          VERSIONS_FILE="$SHA_DIR/versions.json"
+          HAS_UPDATE="false"
+
+          mkdir -p "$SHA_DIR"
+          if [ ! -f "$VERSIONS_FILE" ]; then
+            echo '{}' > "$VERSIONS_FILE"
+          fi
+
+          # ============================================
+          # 辅助函数
+          # ============================================
+
+          get_latest_version() {
+            local api_url=$1
+            local field=$2
+            curl -sL -H "Authorization: token $GITHUB_TOKEN" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 "$api_url" | jq -r ".$field // empty"
+          }
+
+          process_asset() {
+            local name=$1
+            local api_url=$2
+            local field=$3
+            local download_url=$4
+            local dest_path=$5
+            local type=$6
+            local excludes=${7:-""}
+
+            echo "::group::检查 $name"
+
+            local latest_version=$(get_latest_version "$api_url" "$field")
+            if [ -z "$latest_version" ]; then
+              echo "⚠️ 无法获取版本信息，跳过 $name"
+              echo "::endgroup::"
+              return 1
+            fi
+
+            local last_version=$(jq -r --arg k "$name" '.[$k] // empty' "$VERSIONS_FILE")
+
+            echo "  当前版本: $last_version"
+            echo "  最新版本: $latest_version"
+
+            if [ "$latest_version" = "$last_version" ]; then
+              echo "✅ 版本未变化，跳过下载"
+              echo "::endgroup::"
+              return 0
+            fi
+
+            echo "版本有更新，开始下载..."
+
+            local temp_file=$(mktemp)
+            curl -sL -o "$temp_file" "$download_url"
+
+            if [ "$type" = "extract" ]; then
+              echo "解压中..."
+              local extract_dir=$(mktemp -d)
+              unzip -o -q "$temp_file" -d "$extract_dir"
+
+              local target_dir="${dest_path%/}"
+              rm -rf "$target_dir"
+              mkdir -p "$target_dir"
+
+              # 智能判断解压内容结构
+              local entry_count=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | wc -l)
+              if [ "$entry_count" -eq 1 ]; then
+                local single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | head -n 1)
+                if [ -d "$single_entry" ]; then
+                  # 只有一个目录，进入该目录并复制其内容 (适用于 GitHub repo zip)
+                  cp -a "$single_entry"/. "$target_dir/"
+                else
+                  # 只有一个文件
+                  cp -a "$single_entry" "$target_dir/"
+                fi
+              else
+                # 多个文件/目录平铺，直接复制所有内容 (适用于 release zip)
+                cp -a "$extract_dir"/. "$target_dir/"
+              fi
+
+              rm -rf "$extract_dir"
+
+              # 清理不需要的文件夹
+              if [ -n "$excludes" ]; then
+                IFS=',' read -ra EXCLUDE_ARRAY <<< "$excludes"
+                for excl in "${EXCLUDE_ARRAY[@]}"; do
+                  echo "🗑️ 移除不需要的项: $excl"
+                  rm -rf "$target_dir/$excl"
+                done
+              fi
+
+              echo "  ✅ 解压完成，文件已放置到 $target_dir/"
+            else
+              mkdir -p "$(dirname "$dest_path")"
+              mv "$temp_file" "$dest_path"
+              echo "  ✅ 文件已保存到 $dest_path"
+            fi
+
+            rm -f "$temp_file"
+
+            local temp_json=$(mktemp)
+            jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
+            mv "$temp_json" "$VERSIONS_FILE"
+
+            HAS_UPDATE="true"
+            echo "版本记录已更新"
+            echo "::endgroup::"
+            return 0
+          }
+
+          # ============================================
+          # 执行下载任务
+          # ============================================
+          echo "开始同步资产..."
+          echo "========================================"
+
+          # 1. pro-moqi-fuzhu-dicts.zip -> shared/dicts/
+          process_asset \
+            "pro-moqi-fuzhu-dicts" \
+            "https://api.github.com/repos/amzxyz/rime-wanxiang/releases/tags/dict-nightly" \
+            "published_at" \
+            "https://github.com/amzxyz/rime-wanxiang/releases/download/dict-nightly/pro-moqi-fuzhu-dicts.zip" \
+            "shared/dicts/" \
+            "extract"
+
+          # 2. moqi_moe.dict.yaml -> shared/dicts/moe.dict.yaml
+          process_asset \
+            "moqi_moe.dict.yaml" \
+            "https://api.github.com/repos/suiginko/moetype/releases/latest" \
+            "tag_name" \
+            "https://github.com/suiginko/moetype/releases/latest/download/moqi_moe.dict.yaml" \
+            "shared/dicts/moe.dict.yaml" \
+            "file"
+
+          # 3. wanxiang-lts-zh-hans.gram -> shared/
+          process_asset \
+            "wanxiang-lts-zh-hans.gram" \
+            "https://api.github.com/repos/amzxyz/RIME-LMDG/releases/tags/LTS" \
+            "published_at" \
+            "https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram" \
+            "shared/wanxiang-lts-zh-hans.gram" \
+            "file"
+
+          # 4. rime-wanxiang-moqi-fuzhu.zip -> wanxiang/ (排除 dicts, custom)
+          process_asset \
+            "rime-wanxiang-moqi-fuzhu" \
+            "https://api.github.com/repos/amzxyz/rime-wanxiang/releases/latest" \
+            "tag_name" \
+            "https://github.com/amzxyz/rime-wanxiang/releases/latest/download/rime-wanxiang-moqi-fuzhu.zip" \
+            "wanxiang/" \
+            "extract" \
+            "dicts,custom"
+
+          # 5. wanxiang_yoemin 仓库 -> yoemin/
+          process_asset \
+            "wanxiang_yoemin" \
+            "https://api.github.com/repos/yuanz-12/wanxiang_yoemin/commits/main" \
+            "sha" \
+            "https://github.com/yuanz-12/wanxiang_yoemin/archive/refs/heads/main.zip" \
+            "yoemin/" \
+            "extract"
+
+          echo "========================================"
+          echo "同步摘要: HAS_UPDATE = $HAS_UPDATE"
+          echo ""
+
+          # ============================================
+          # 提交哈希记录并推送 WebDAV
+          # ============================================
+          if [ "$HAS_UPDATE" = "true" ]; then
+            # 1. 配置 rclone
+            echo "⚙️ 配置 rclone WebDAV 连接..."
+            mkdir -p ~/.config/rclone
+            # rclone 需要密码被 obscure 加密
+            OBSCURED_PASS=$(rclone obscure "$WEBDAV_PASSWORD")
+
+            cat > ~/.config/rclone/rclone.conf <<EOF
+          [webdav]
+          type = webdav
+          url = $WEBDAV_URL
+          vendor = other
+          user = $WEBDAV_USERNAME
+          pass = $OBSCURED_PASS
+          EOF
+
+            # 2. 使用 rclone sync 将当前目录文件同步到 WebDAV 的 LyraIME 文件夹
+            echo "☁️  同步配置文件到 WebDAV 的 LyraIME 目录..."
+            echo "  目标: $WEBDAV_URL/LyraIME/"
+
+            # 使用 sync 模式：会使 WebDAV 上的 LyraIME 目录与本地完全一致（删除多余的旧文件）
+            # 排除 .git, .github 等目录及文件
+            rclone sync . webdav:LyraIME \
+              --exclude ".git/**" \
+              --exclude ".github/**" \
+              --exclude ".gitignore" \
+              --exclude "README.md" \
+              -v
+
+            echo "  ✅ WebDAV 同步完成！服务器上已生成 LyraIME 文件夹及内部文件。"
+
+            # 3. 机器人直接提交 SHA 记录到当前分支
+            echo ""
+            echo "准备通过机器人提交哈希记录..."
+
+            # 配置机器人的身份
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            # 获取当前所在分支
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+            # 添加版本记录文件并提交
+            git add "$VERSIONS_FILE"
+            git commit -m "chore: sync asset versions [skip ci]"
+
+            # 直接推送到当前触发的分支
+            echo "当前在 $CURRENT_BRANCH 分支，直接推送..."
+            git push origin "$CURRENT_BRANCH"
+
+            echo ""
+            echo "同步与提交完成。"
+          else
+            echo "没有任何资产更新，跳过 Git 提交和 WebDAV 推送。"
+          fi
