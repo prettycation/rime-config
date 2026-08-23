@@ -33,12 +33,29 @@ jobs:
         run: |
           curl -sL https://rclone.org/install.sh | sudo bash
 
+      # ============================================
+      # 恢复资产缓存
+      # ============================================
+      - name: Restore asset cache
+        id: cache-assets
+        uses: actions/cache@v4
+        with:
+          path: |
+            shared/dicts
+            shared/wanxiang-lts-zh-hans.gram
+            wanxiang
+            yoemin
+          key: rime-assets-${{ hashFiles('.github/sync/sha/versions.json') }}
+          restore-keys: |
+            rime-assets-
+
       - name: Sync assets and push to WebDAV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WEBDAV_URL: ${{ secrets.WEBDAV_URL }}
           WEBDAV_USERNAME: ${{ secrets.WEBDAV_USERNAME }}
           WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
+          TRIGGER_EVENT: ${{ github.event_name }} # 获取触发事件类型
         run: |
           #!/bin/bash
           set -euo pipefail
@@ -104,7 +121,13 @@ jobs:
             if [ "$type" = "extract" ]; then
               echo "解压中..."
               local extract_dir=$(mktemp -d)
-              unzip -o -q "$temp_file" -d "$extract_dir"
+
+              if ! unzip -o "$temp_file" -d "$extract_dir" > /dev/null 2>&1; then
+                echo "❌ 解压失败！文件可能已损坏或不是有效的 zip 格式。"
+                file "$temp_file"
+                rm -rf "$extract_dir" "$temp_file"
+                exit 1
+              fi
 
               local target_dir="${dest_path%/}"
               # 不删除原有目录，避免覆盖用户自定义文件
@@ -137,7 +160,7 @@ jobs:
                 done
               fi
 
-              echo "  ✅ 解压完成，文件已合并到 $target_dir/"
+              echo "  ✅ 解压完成，文件已放置到 $target_dir/"
             else
               mkdir -p "$(dirname "$dest_path")"
               mv "$temp_file" "$dest_path"
@@ -146,12 +169,14 @@ jobs:
 
             rm -f "$temp_file"
 
-            local temp_json=$(mktemp)
-            jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
-            mv "$temp_json" "$VERSIONS_FILE"
+            if [ "$latest_version" != "$last_version" ]; then
+              local temp_json=$(mktemp)
+              jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
+              mv "$temp_json" "$VERSIONS_FILE"
+              HAS_UPDATE="true"
+              echo "版本记录已更新"
+            fi
 
-            HAS_UPDATE="true"
-            echo "版本记录已更新"
             echo "::endgroup::"
             return 0
           }
@@ -210,12 +235,28 @@ jobs:
 
           echo "========================================"
           echo "同步摘要: HAS_UPDATE = $HAS_UPDATE"
+          echo "触发事件: $TRIGGER_EVENT"
           echo ""
 
           # ============================================
-          # 提交哈希记录并推送 WebDAV
+          # 判断是否需要执行 WebDAV 同步
           # ============================================
+          NEED_SYNC="false"
+
           if [ "$HAS_UPDATE" = "true" ]; then
+            echo "检测到资产有更新，需要同步到 WebDAV。"
+            NEED_SYNC="true"
+          elif [ "$TRIGGER_EVENT" = "push" ]; then
+            echo "检测到 Push 事件，代码可能有变更，需要同步到 WebDAV。"
+            NEED_SYNC="true"
+          else
+            echo "触发事件为 $TRIGGER_EVENT，且资产无更新，无需同步到 WebDAV。"
+          fi
+
+          # ============================================
+          # 推送到 WebDAV 并提交哈希记录
+          # ============================================
+          if [ "$NEED_SYNC" = "true" ]; then
             # 1. 配置 rclone
             echo "⚙️ 配置 rclone WebDAV 连接..."
             mkdir -p ~/.config/rclone
@@ -244,9 +285,11 @@ jobs:
               --exclude "README.md" \
               -v
 
-            echo "  ✅ WebDAV 同步完成！服务器上已生成 LyraIME 文件夹及内部文件。"
+            echo "  ✅ WebDAV 同步完成！"
+          fi
 
-            # 3. 机器人直接提交 SHA 记录到当前分支
+          # 3. 如果版本有更新，机器人提交 SHA 记录到当前分支
+          if [ "$HAS_UPDATE" = "true" ]; then
             echo ""
             echo "准备通过机器人提交哈希记录..."
 
@@ -268,5 +311,6 @@ jobs:
             echo ""
             echo "同步与提交完成。"
           else
-            echo "没有任何资产更新，跳过 Git 提交和 WebDAV 推送。"
+            echo ""
+            echo "没有任何资产版本更新，跳过 Git 提交。"
           fi
