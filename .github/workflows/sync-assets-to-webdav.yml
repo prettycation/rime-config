@@ -55,7 +55,8 @@ jobs:
           WEBDAV_URL: ${{ secrets.WEBDAV_URL }}
           WEBDAV_USERNAME: ${{ secrets.WEBDAV_USERNAME }}
           WEBDAV_PASSWORD: ${{ secrets.WEBDAV_PASSWORD }}
-          TRIGGER_EVENT: ${{ github.event_name }} # 获取触发事件类型
+          TRIGGER_EVENT: ${{ github.event_name }}
+          CACHE_HIT: ${{ steps.cache-assets.outputs.cache-hit }}
         run: |
           #!/bin/bash
           set -euo pipefail
@@ -108,12 +109,17 @@ jobs:
             echo "  最新版本: $latest_version"
 
             if [ "$latest_version" = "$last_version" ]; then
-              echo "✅ 版本未变化，跳过下载"
-              echo "::endgroup::"
-              return 0
+              # 检查缓存是否命中，如果没命中则必须下载
+              if [ "$CACHE_HIT" = "true" ]; then
+                echo "✅ 版本未变化，且缓存可用，跳过下载"
+                echo "::endgroup::"
+                return 0
+              else
+                echo "ℹ️ 版本未变化，但无缓存，开始下载以填充工作区..."
+              fi
+            else
+              echo "版本有更新，开始下载..."
             fi
-
-            echo "版本有更新，开始下载..."
 
             local temp_file=$(mktemp)
             curl -sL -o "$temp_file" "$download_url"
@@ -169,6 +175,7 @@ jobs:
 
             rm -f "$temp_file"
 
+            # 只有当版本变化时，才更新记录文件
             if [ "$latest_version" != "$last_version" ]; then
               local temp_json=$(mktemp)
               jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
@@ -236,6 +243,7 @@ jobs:
           echo "========================================"
           echo "同步摘要: HAS_UPDATE = $HAS_UPDATE"
           echo "触发事件: $TRIGGER_EVENT"
+          echo "缓存命中: $CACHE_HIT"
           echo ""
 
           # ============================================
@@ -249,8 +257,12 @@ jobs:
           elif [ "$TRIGGER_EVENT" = "push" ]; then
             echo "检测到 Push 事件，代码可能有变更，需要同步到 WebDAV。"
             NEED_SYNC="true"
+          elif [ "$CACHE_HIT" != "true" ]; then
+            # 如果缓存没命中，说明刚才重新下载了资产填充工作区，需要同步一次以防万一
+            echo "缓存未命中，刚重新下载了资产，需要同步到 WebDAV。"
+            NEED_SYNC="true"
           else
-            echo "触发事件为 $TRIGGER_EVENT，且资产无更新，无需同步到 WebDAV。"
+            echo "触发事件为 $TRIGGER_EVENT，资产无更新，缓存可用，无需同步到 WebDAV。"
           fi
 
           # ============================================
