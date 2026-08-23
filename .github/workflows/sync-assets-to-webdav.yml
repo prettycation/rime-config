@@ -8,6 +8,8 @@ on:
     branches:
       - main # 推送到 main 时触发（正式环境）
       - "CI/**" # 推送到 CI/* 分支时触发（测试环境）
+      - "develop/**" # 推送到 develop/* 分支时触发（测试环境）
+      - "fix/**" # 推送到 fix/* 分支时触发（测试环境）
 
 jobs:
   sync:
@@ -105,7 +107,7 @@ jobs:
               unzip -o -q "$temp_file" -d "$extract_dir"
 
               local target_dir="${dest_path%/}"
-              rm -rf "$target_dir"
+              # 不删除原有目录，避免覆盖用户自定义文件
               mkdir -p "$target_dir"
 
               # 智能判断解压内容结构
@@ -135,7 +137,7 @@ jobs:
                 done
               fi
 
-              echo "  ✅ 解压完成，文件已放置到 $target_dir/"
+              echo "  ✅ 解压完成，文件已合并到 $target_dir/"
             else
               mkdir -p "$(dirname "$dest_path")"
               mv "$temp_file" "$dest_path"
