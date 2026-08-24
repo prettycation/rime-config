@@ -245,6 +245,10 @@ jobs:
             "shared/dicts/moe.dict.yaml" \
             "file"
 
+          # 复制一份到 shared/ 目录下
+          echo "复制 moe.dict.yaml 到 shared/moe.dict.yaml"
+          cp -f "shared/dicts/moe.dict.yaml" "shared/moe.dict.yaml"
+
           # 3. wanxiang-lts-zh-hans.gram -> shared/
           process_asset \
             "wanxiang-lts-zh-hans.gram" \
