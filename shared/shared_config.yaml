@@ -10,36 +10,44 @@ custom_phrase:
 
 grammar:
   language: wanxiang-lts-zh-hans
-  collocation_max_length: 6
-  collocation_min_length: 2
-  collocation_penalty: -14
-  non_collocation_penalty: -6
-  weak_collocation_penalty: -100
+  collocation_max_length: 8
+  collocation_min_length: 3
+  collocation_penalty: -10
+  non_collocation_penalty: -17
   rear_penalty: -18
+  weak_collocation_penalty: -24
 
 user_predict:
-  db_name: "user_predict" # 用户预测数据库
-  predict_style: "all" # 预测样式
-  use_space_to_commit: true # 是否使用空格提交预测
-  max_candidates: 9 # 最大预测候选数
-  max_predictions: 15 # 最大预测条数（S-Gram 不受限制）
-  max_history_entries: 5 # 上文最大历史记录
-  expiry_days: 90 # 预测过期天数（S-Gram 永不过期）
-  decay_rate: 0.85 # 预测衰减率
-  context_timeout: 10000 # 上下文超时（毫秒）
+  enable_post_predict: true # 引擎 A：是否开启上屏后的联想预测
+  enable_context_reorder: true # 引擎 B：是否开启输入过程中的实时上下文调频
+  max_candidates: 5 # 候选栏中最多显示的联想词数量
+  max_predictions: 3 # 级联深度：允许连续自动预测的最大跳数
+  expiry_days: 90 # 物理生命周期：超 90 天未使用的 1/2-Gram 将被销毁
+  activation_days: 7 # 激活锁：新词若 7 天内不再使用，将被视为噪音冷冻
+  decay_rate: 0.85 # 遗忘衰减率：数值越小，旧词权重掉得越快
+  context_timeout: 5000 # 语境熔断 (ms)：停顿超 5 秒自动切断上下文，防远距离穿透
+  enable_predict_space: false # 键盘双模式 AB 面开关
+  db_name: "lua/predict"
+# 模式 B (默认 false，沉浸预测流)：Space 空格键交由 Rime 原生系统顺滑选词；按下 Tab、→、\ 或 Alt 等替身键时，打断联想并强制输出物理空格。
+
+# 模式 A (true，精准空格流)：Space 强制打断联想并输出物理空格；替身键仅作纯粹的打断清空。
 
 super_comment:
   candidate_length: 16 # 注释候选长度
+  corrector_type: "comment" # 随意更换左右括号，比如"〔comment〕" 不加括号为无括号，comment占位不能动
+  chaifen: "chaifen" # 拆分显示，随意更换左右括号，比如"〔chaifen〕" 不加括号为无括号，chaifen占位不能动
   cand_type:
-    user_phrase: "" # 用户自造词
-    sentence: "" # 整句
-    table: "✬" # 系统码表词
-    typo: "" # 纠错
-    user_table: "" # 用户码表词
-    completion: "⋙" # 编码补全
-    abbrev: "" # 简码
-    predict: "∞" # 预测候选
-    pinned: "" # pin 候选
+    user_phrase: "⁺" # 用户自造词
+    sentence: "∞" # 整句
+    table: "✬" # mix词库里的词
+    user_table": "⌥" # 自定义短语
+    typo: "⇄" # 纠错
+    user_table: "⌥" # 自定义短语
+    completion: "☯" # 长词联想
+    abbrev: "ϟ" # 简码
+    predict: "⋙" # 预测候选
+    pinned: "📌" # pin 候选
+    # phrase: ""                  # cn词库里的词
 
 super_processor:
   enable_backspace_limit: true

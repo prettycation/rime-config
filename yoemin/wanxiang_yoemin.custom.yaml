@@ -8,6 +8,9 @@ patch:
   user_predict:
     __include: shared_config.yaml:/user_predict
 
+  super_comment:
+    __include: shared_config.yaml:/super_comment
+
   # Tips 配置项
   "super_tips/disabled_types/+":
     - "化学式"
@@ -26,20 +29,6 @@ patch:
   # 关闭数字后自动半角功能
   punctuator/digit_separators: commit
   #下面是候选数量，未来7890分别代表1234声，请候选长度不要大于6避免冲突
-
-  #下面是超级注释相关
-  # 超级注释模块，子项配置 true 开启，false 关闭
-  "super_comment/candidate_length": 6 # 候选词辅助码提醒的生效长度，0为关闭  但同时清空其它，应当使用上面开关来处理
-  "super_comment/corrector_type": "comment" # 错音措字，随意更换左右括号，比如"〔comment〕" 不加括号为无括号，comment占位不能动
-  "super_comment/chaifen": "chaifen" # 拆分显示，随意更换左右括号，比如"〔chaifen〕" 不加括号为无括号，chaifen占位不能动
-  "super_comment/cand_type/sentence": "∞"
-  "super_comment/cand_type/predict": "*"
-  "super_comment/cand_type/user_table": "⌥" # 自定义短语
-  "super_comment/cand_type/completion": "☯" # 长词联想
-  "super_comment/cand_type/abbrev": "ϟ" # 简码
-  "super_comment/cand_type/fallback": "~"
-  # phrase: ""                  # cn词库里的词
-  # table: ""                   # mix词库里的词
 
   # 字符集过滤lua
   # a,通用规范汉字表
