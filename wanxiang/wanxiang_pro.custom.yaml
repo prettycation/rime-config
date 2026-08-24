@@ -46,16 +46,6 @@ patch:
   translator/packs/+:
     - "moe" #导入根目录下xx.dict.yaml作为自定义固定词典，名称为name字段的值，编码要与固定词库一致，编码权重都不要少，形如姓名、专有名词公司名称等等
 
-  # 输入引擎
-  # 使用 *文件名*对象名 的语法直接加载 Lua 插件
-
-  # rime-trans 翻译插件
-  # 挂载处理器 (处理快捷键)
-  "engine/processors/@next": lua_processor@*input_text*processor
-
-  # 在去重前挂载过滤器 (生成翻译候选词)
-  "engine/filters/@before 7": lua_filter@*input_text*filter
-
   grammar:
     language: wanxiang-lts-zh-hans
     collocation_max_length: 8
