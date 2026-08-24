@@ -47,28 +47,16 @@ patch:
     - "moe" #导入根目录下xx.dict.yaml作为自定义固定词典，名称为name字段的值，编码要与固定词库一致，编码权重都不要少，形如姓名、专有名词公司名称等等
 
   grammar:
-    language: wanxiang-lts-zh-hans
-    collocation_max_length: 8
-    collocation_min_length: 3
-    collocation_penalty: -10
-    non_collocation_penalty: -17
-    rear_penalty: -18
-    weak_collocation_penalty: -24
+    __include: shared_config.yaml:/grammar
+
+  custom_phrase:
+    __include: shared_config.yaml:/custom_phrase
 
   user_predict:
-    enable_post_predict: true # 引擎 A：是否开启上屏后的联想预测
-    enable_context_reorder: true # 引擎 B：是否开启输入过程中的实时上下文调频
-    max_candidates: 5 # 候选栏中最多显示的联想词数量
-    max_predictions: 3 # 级联深度：允许连续自动预测的最大跳数
-    expiry_days: 90 # 物理生命周期：超 90 天未使用的 1/2-Gram 将被销毁
-    activation_days: 7 # 激活锁：新词若 7 天内不再使用，将被视为噪音冷冻
-    decay_rate: 0.85 # 遗忘衰减率：数值越小，旧词权重掉得越快
-    context_timeout: 5000 # 语境熔断 (ms)：停顿超 5 秒自动切断上下文，防远距离穿透
-    enable_predict_space: false # 键盘双模式 AB 面开关
-    db_name: "lua/predict"
-  # 模式 B (默认 false，沉浸预测流)：Space 空格键交由 Rime 原生系统顺滑选词；按下 Tab、→、\ 或 Alt 等替身键时，打断联想并强制输出物理空格。
+    __include: shared_config.yaml:/user_predict
 
-  # 模式 A (true，精准空格流)：Space 强制打断联想并输出物理空格；替身键仅作纯粹的打断清空。
+  super_comment:
+    __include: shared_config.yaml:/super_comment
 
   # Tips 配置项
   "super_tips/disabled_types/+":
@@ -88,20 +76,6 @@ patch:
   # 关闭数字后自动半角功能
   punctuator/digit_separators: commit
   #下面是候选数量，未来7890分别代表1234声，请候选长度不要大于6避免冲突
-
-  #下面是超级注释相关
-  # 超级注释模块，子项配置 true 开启，false 关闭
-  "super_comment/candidate_length": 6 # 候选词辅助码提醒的生效长度，0为关闭  但同时清空其它，应当使用上面开关来处理
-  "super_comment/corrector_type": "comment" # 错音措字，随意更换左右括号，比如"〔comment〕" 不加括号为无括号，comment占位不能动
-  "super_comment/chaifen": "chaifen" # 拆分显示，随意更换左右括号，比如"〔chaifen〕" 不加括号为无括号，chaifen占位不能动
-  "super_comment/cand_type/sentence": "∞"
-  "super_comment/cand_type/predict": "*"
-  "super_comment/cand_type/user_table": "⌥" # 自定义短语
-  "super_comment/cand_type/completion": "☯" # 长词联想
-  "super_comment/cand_type/abbrev": "ϟ" # 简码
-  "super_comment/cand_type/fallback": "~"
-  # phrase: ""                  # cn词库里的词
-  # table: ""                   # mix词库里的词
 
   # 字符集过滤lua
   # a,通用规范汉字表
