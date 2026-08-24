@@ -1,7 +1,7 @@
 {
-  "pro-moqi-fuzhu-dicts": "2026-08-24T02:05:26Z",
-  "moqi_moe.dict.yaml": "20260818",
-  "wanxiang-lts-zh-hans.gram": "2025-12-07T07:13:21Z",
-  "rime-wanxiang-moqi-fuzhu": "v17.5.8",
+  "pro-moqi-fuzhu-dicts": "sha256:872fcffb0d1e0bd79f88b14099a9a2ba473c09c6eb861cda6e966aebe495bb63",
+  "moqi_moe.dict.yaml": "sha256:88c8fdfa77e56e331b8c462fa4ccec9f12ed0f08eb4c78eecfe1fb07cf238fae",
+  "wanxiang-lts-zh-hans.gram": "sha256:01ffe37f22607bf8a5cd5d82a3349f6df97744369464aee4577585112d85469d",
+  "rime-wanxiang-moqi-fuzhu": "sha256:e3603714d332e11190e07dee811cb93270d8d67097bb0eb299f212085c116e9e",
   "wanxiang_yoemin": "3c4981cf5ace94e48d983bc6639381f4b738ca93"
 }

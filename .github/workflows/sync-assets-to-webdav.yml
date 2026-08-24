@@ -77,26 +77,55 @@ jobs:
           # 辅助函数
           # ============================================
 
-          get_latest_version() {
-            local api_url=$1
-            local field=$2
-            curl -sL -H "Authorization: token $GITHUB_TOKEN" \
-                 -H "Accept: application/vnd.github.v3+json" \
-                 "$api_url" | jq -r ".$field // empty"
+          # 获取最新版本哈希
+          # 参数: check_type, repo, ref, asset_name, download_url
+          get_latest_hash() {
+            local check_type=$1
+            local repo=$2
+            local ref=$3
+            local asset_name=$4
+            local download_url=$5
+
+            if [ "$check_type" = "commit" ]; then
+              curl -sL -H "Authorization: token $GITHUB_TOKEN" \
+                   -H "Accept: application/vnd.github.v3+json" \
+                   "https://api.github.com/repos/$repo/commits/$ref" | jq -r ".sha // empty"
+            elif [ "$check_type" = "release_asset" ]; then
+              local api_url=""
+              if [ "$ref" = "latest" ]; then
+                api_url="https://api.github.com/repos/$repo/releases/latest"
+              else
+                api_url="https://api.github.com/repos/$repo/releases/tags/$ref"
+              fi
+              
+              # 优先获取资产的 digest (sha256)
+              local digest=$(curl -sL -H "Authorization: token $GITHUB_TOKEN" \
+                   -H "Accept: application/vnd.github.v3+json" \
+                   "$api_url" | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .digest // empty')
+              
+              if [ -n "$digest" ]; then
+                echo "$digest"
+              else
+                # 回退机制：获取 ETag
+                curl -sIL -o /dev/null -w "%{etag}" "$download_url"
+              fi
+            fi
           }
 
           process_asset() {
             local name=$1
-            local api_url=$2
-            local field=$3
-            local download_url=$4
-            local dest_path=$5
-            local type=$6
-            local excludes=${7:-""}
+            local check_type=$2
+            local repo=$3
+            local ref=$4
+            local asset_name=$5
+            local download_url=$6
+            local dest_path=$7
+            local type=$8
+            local excludes=${9:-""}
 
             echo "::group::检查 $name"
 
-            local latest_version=$(get_latest_version "$api_url" "$field")
+            local latest_version=$(get_latest_hash "$check_type" "$repo" "$ref" "$asset_name" "$download_url")
             if [ -z "$latest_version" ]; then
               echo "⚠️ 无法获取版本信息，跳过 $name"
               echo "::endgroup::"
@@ -197,8 +226,10 @@ jobs:
           # 1. pro-moqi-fuzhu-dicts.zip -> shared/dicts/
           process_asset \
             "pro-moqi-fuzhu-dicts" \
-            "https://api.github.com/repos/amzxyz/rime-wanxiang/releases/tags/dict-nightly" \
-            "published_at" \
+            "release_asset" \
+            "amzxyz/rime-wanxiang" \
+            "dict-nightly" \
+            "pro-moqi-fuzhu-dicts.zip" \
             "https://github.com/amzxyz/rime-wanxiang/releases/download/dict-nightly/pro-moqi-fuzhu-dicts.zip" \
             "shared/dicts/" \
             "extract"
@@ -206,8 +237,10 @@ jobs:
           # 2. moqi_moe.dict.yaml -> shared/dicts/moe.dict.yaml
           process_asset \
             "moqi_moe.dict.yaml" \
-            "https://api.github.com/repos/suiginko/moetype/releases/latest" \
-            "tag_name" \
+            "release_asset" \
+            "suiginko/moetype" \
+            "latest" \
+            "moqi_moe.dict.yaml" \
             "https://github.com/suiginko/moetype/releases/latest/download/moqi_moe.dict.yaml" \
             "shared/dicts/moe.dict.yaml" \
             "file"
@@ -215,8 +248,10 @@ jobs:
           # 3. wanxiang-lts-zh-hans.gram -> shared/
           process_asset \
             "wanxiang-lts-zh-hans.gram" \
-            "https://api.github.com/repos/amzxyz/RIME-LMDG/releases/tags/LTS" \
-            "published_at" \
+            "release_asset" \
+            "amzxyz/RIME-LMDG" \
+            "LTS" \
+            "wanxiang-lts-zh-hans.gram" \
             "https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram" \
             "shared/wanxiang-lts-zh-hans.gram" \
             "file"
@@ -224,8 +259,10 @@ jobs:
           # 4. rime-wanxiang-moqi-fuzhu.zip -> wanxiang/ (排除 dicts, custom)
           process_asset \
             "rime-wanxiang-moqi-fuzhu" \
-            "https://api.github.com/repos/amzxyz/rime-wanxiang/releases/latest" \
-            "tag_name" \
+            "release_asset" \
+            "amzxyz/rime-wanxiang" \
+            "latest" \
+            "rime-wanxiang-moqi-fuzhu.zip" \
             "https://github.com/amzxyz/rime-wanxiang/releases/latest/download/rime-wanxiang-moqi-fuzhu.zip" \
             "wanxiang/" \
             "extract" \
@@ -234,8 +271,10 @@ jobs:
           # 5. wanxiang_yoemin 仓库 -> yoemin/
           process_asset \
             "wanxiang_yoemin" \
-            "https://api.github.com/repos/yuanz-12/wanxiang_yoemin/commits/main" \
-            "sha" \
+            "commit" \
+            "yuanz-12/wanxiang_yoemin" \
+            "main" \
+            "" \
             "https://github.com/yuanz-12/wanxiang_yoemin/archive/refs/heads/main.zip" \
             "yoemin/" \
             "extract"
