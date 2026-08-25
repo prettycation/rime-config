@@ -34,17 +34,13 @@ jobs:
           curl -sL https://rclone.org/install.sh | sudo bash
 
       # ============================================
-      # 恢复资产缓存
+      # 恢复资产缓存 (只缓存原始下载文件，避免覆盖 Git 代码)
       # ============================================
       - name: Restore asset cache
         id: cache-assets
         uses: actions/cache@v4
         with:
-          path: |
-            shared/dicts
-            shared/wanxiang-lts-zh-hans.gram
-            wanxiang
-            yoemin
+          path: downloads
           key: rime-assets-${{ hashFiles('.github/sync/sha/versions.json') }}
           restore-keys: |
             rime-assets-
@@ -68,7 +64,7 @@ jobs:
           VERSIONS_FILE="$SHA_DIR/versions.json"
           HAS_UPDATE="false"
 
-          mkdir -p "$SHA_DIR"
+          mkdir -p "$SHA_DIR" "downloads"
           if [ ! -f "$VERSIONS_FILE" ]; then
             echo '{}' > "$VERSIONS_FILE"
           fi
@@ -97,12 +93,12 @@ jobs:
               else
                 api_url="https://api.github.com/repos/$repo/releases/tags/$ref"
               fi
-              
+
               # 优先获取资产的 digest (sha256)
               local digest=$(curl -sL -H "Authorization: token $GITHUB_TOKEN" \
                    -H "Accept: application/vnd.github.v3+json" \
                    "$api_url" | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .digest // empty')
-              
+
               if [ -n "$digest" ]; then
                 echo "$digest"
               else
@@ -137,21 +133,19 @@ jobs:
             echo "  当前版本: $last_version"
             echo "  最新版本: $latest_version"
 
-            if [ "$latest_version" = "$last_version" ]; then
-              # 检查缓存是否命中，如果没命中则必须下载
-              if [ "$CACHE_HIT" = "true" ]; then
-                echo "✅ 版本未变化，且缓存可用，跳过下载"
-                echo "::endgroup::"
-                return 0
-              else
-                echo "ℹ️ 版本未变化，但无缓存，开始下载以填充工作区..."
-              fi
-            else
-              echo "版本有更新，开始下载..."
-            fi
+            # 缓存文件路径
+            local cached_file="downloads/$(basename "$download_url")"
+            local temp_file=""
 
-            local temp_file=$(mktemp)
-            curl -sL -o "$temp_file" "$download_url"
+            if [ "$latest_version" = "$last_version" ] && [ "$CACHE_HIT" = "true" ] && [ -f "$cached_file" ]; then
+              echo "✅ 版本未变化，且缓存可用，跳过下载，直接使用缓存文件"
+              temp_file="$cached_file"
+            else
+              echo "版本有更新或无缓存，开始下载..."
+              mkdir -p downloads
+              curl -sL -o "$cached_file" "$download_url"
+              temp_file="$cached_file"
+            fi
 
             if [ "$type" = "extract" ]; then
               echo "解压中..."
@@ -160,7 +154,7 @@ jobs:
               if ! unzip -o "$temp_file" -d "$extract_dir" > /dev/null 2>&1; then
                 echo "❌ 解压失败！文件可能已损坏或不是有效的 zip 格式。"
                 file "$temp_file"
-                rm -rf "$extract_dir" "$temp_file"
+                rm -rf "$extract_dir"
                 exit 1
               fi
 
@@ -195,14 +189,13 @@ jobs:
                 done
               fi
 
-              echo "  ✅ 解压完成，文件已放置到 $target_dir/"
+              echo "  ✅ 解压完成，文件已合并到 $target_dir/"
             else
               mkdir -p "$(dirname "$dest_path")"
-              mv "$temp_file" "$dest_path"
+              # 使用 cp 而不是 mv，以保留 downloads 里的缓存文件
+              cp -f "$temp_file" "$dest_path"
               echo "  ✅ 文件已保存到 $dest_path"
             fi
-
-            rm -f "$temp_file"
 
             # 只有当版本变化时，才更新记录文件
             if [ "$latest_version" != "$last_version" ]; then
@@ -338,6 +331,7 @@ jobs:
               --exclude ".github/**" \
               --exclude ".gitignore" \
               --exclude "README.md" \
+              --exclude "downloads/" \
               -v
 
             echo "  ✅ WebDAV 同步完成！"
