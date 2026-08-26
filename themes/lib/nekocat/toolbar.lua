@@ -92,7 +92,7 @@ local toolbar = toolbar {
       }
     },
     {
-      action = "KeyboardLayouts",
+      action = "OneHandedSwitch",
       foreground = {
         font_size = 18,
         padding = 2,
