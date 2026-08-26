@@ -27,7 +27,7 @@ jobs:
       - name: Set up tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq jq unzip curl rsync
+          sudo apt-get install -y -qq jq unzip curl
 
       - name: Install rclone
         run: |
@@ -167,13 +167,12 @@ jobs:
               if [ "$entry_count" -eq 1 ]; then
                 local single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | head -n 1)
                 if [ -d "$single_entry" ]; then
-                  # 使用 rsync --ignore-existing 避免覆盖 Git 仓库中的用户自定义文件
-                  rsync -a --ignore-existing "$single_entry"/ "$target_dir/"
+                  cp -a "$single_entry"/. "$target_dir/"
                 else
-                  rsync -a --ignore-existing "$single_entry" "$target_dir/"
+                  cp -a "$single_entry" "$target_dir/"
                 fi
               else
-                rsync -a --ignore-existing "$extract_dir"/ "$target_dir/"
+                cp -a "$extract_dir"/. "$target_dir/"
               fi
 
               rm -rf "$extract_dir"
@@ -187,7 +186,7 @@ jobs:
                 done
               fi
 
-              echo "  ✅ 解压完成，文件已合并到 $target_dir/"
+              echo "  ✅ 资产已解压到 $target_dir/"
             else
               mkdir -p "$(dirname "$dest_path")"
               # 使用 cp 而不是 mv，以保留 downloads 里的缓存文件
@@ -275,6 +274,14 @@ jobs:
             "extract"
 
           echo "========================================"
+
+          # 恢复用户仓库中的自定义文件
+          # 资产解压后，用 Git 检出的用户文件覆盖掉被资产覆盖的同名文件
+          echo "🔄 恢复用户仓库中的自定义文件 (覆盖资产默认文件)..."
+          git restore . 2>/dev/null || true
+          echo "✅ 用户自定义文件已恢复"
+          echo ""
+
           echo "同步摘要: HAS_UPDATE = $HAS_UPDATE"
           echo "触发事件: $TRIGGER_EVENT"
           echo "缓存命中: $CACHE_HIT"
