@@ -27,7 +27,7 @@ jobs:
       - name: Set up tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq jq unzip curl
+          sudo apt-get install -y -qq jq unzip curl rsync
 
       - name: Install rclone
         run: |
@@ -167,15 +167,13 @@ jobs:
               if [ "$entry_count" -eq 1 ]; then
                 local single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | head -n 1)
                 if [ -d "$single_entry" ]; then
-                  # 只有一个目录，进入该目录并复制其内容 (适用于 GitHub repo zip)
-                  cp -a "$single_entry"/. "$target_dir/"
+                  # 使用 rsync --ignore-existing 避免覆盖 Git 仓库中的用户自定义文件
+                  rsync -a --ignore-existing "$single_entry"/ "$target_dir/"
                 else
-                  # 只有一个文件
-                  cp -a "$single_entry" "$target_dir/"
+                  rsync -a --ignore-existing "$single_entry" "$target_dir/"
                 fi
               else
-                # 多个文件/目录平铺，直接复制所有内容 (适用于 release zip)
-                cp -a "$extract_dir"/. "$target_dir/"
+                rsync -a --ignore-existing "$extract_dir"/ "$target_dir/"
               fi
 
               rm -rf "$extract_dir"
