@@ -276,9 +276,21 @@ jobs:
           echo "========================================"
 
           # 恢复用户仓库中的自定义文件
-          # 资产解压后，用 Git 检出的用户文件覆盖掉被资产覆盖的同名文件
           echo "🔄 恢复用户仓库中的自定义文件 (覆盖资产默认文件)..."
-          git restore . 2>/dev/null || true
+
+          # 1. 备份 versions.json，防止 git restore 将其恢复为旧版
+          if [ -f "$VERSIONS_FILE" ]; then
+            cp "$VERSIONS_FILE" /tmp/versions_backup.json
+          fi
+
+          # 2. 强制重置工作区到 HEAD，恢复所有被跟踪的用户文件
+          git reset --hard HEAD
+
+          # 3. 将备份的最新 versions.json 恢复回去
+          if [ -f /tmp/versions_backup.json ]; then
+            cp /tmp/versions_backup.json "$VERSIONS_FILE"
+          fi
+
           echo "✅ 用户自定义文件已恢复"
           echo ""
 
@@ -354,9 +366,9 @@ jobs:
             # 获取当前所在分支
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-            # 添加版本记录文件并提交
+            # 添加版本记录文件并提交 (如果没有改动则跳过，防止报错)
             git add "$VERSIONS_FILE"
-            git commit -m "chore: sync asset versions [skip ci]"
+            git diff --staged --quiet || git commit -m "chore: sync asset versions [skip ci]"
 
             # 直接推送到当前触发的分支
             echo "当前在 $CURRENT_BRANCH 分支，直接推送..."
