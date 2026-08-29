@@ -1,7 +1,7 @@
 {
-  "pro-moqi-fuzhu-dicts": "sha256:af2abdb9adf30b6640493513ded383a68b748c2c44703fdb49a1e3d28397bf2a",
+  "pro-moqi-fuzhu-dicts": "sha256:bc4c893d67734a69b1821ce6ec7c549eefb7a5ea82cd9ccfd379eb743bf189e5",
   "moqi_moe.dict.yaml": "sha256:88c8fdfa77e56e331b8c462fa4ccec9f12ed0f08eb4c78eecfe1fb07cf238fae",
-  "wanxiang-lts-zh-hans.gram": "sha256:01ffe37f22607bf8a5cd5d82a3349f6df97744369464aee4577585112d85469d",
-  "rime-wanxiang-moqi-fuzhu": "sha256:9e6a590687c78361846acc500551af0b665b5465e0726b7293691001d1162c3e",
+  "wanxiang-lts-zh-hans.gram": "sha256:4554bbe1ba683c416e64ab15d65c944743bdad5251285032681f12d24ee87102",
+  "rime-wanxiang-moqi-fuzhu": "sha256:ff5909dc7f2f81bdf8a26f918ebfa8c244f0cd9e0f04431538a17707219ed8b3",
   "wanxiang_yoemin": "6ed78908a28240a8311afa9fc3afea344dc4b69e"
 }
