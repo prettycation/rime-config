@@ -253,27 +253,26 @@ jobs:
             "" \
             "dicts-pro"
 
-          # 2. moegirl.pro.dict.yaml -> shared/dicts/moe.dict.yaml
-          process_asset \
-            "moegirl.pro.dict.yaml" \
-            "commit" \
-            "yuanz-12/momo" \
-            "main" \
-            "" \
-            "https://raw.githubusercontent.com/yuanz-12/momo/main/dicts-pro/moegirl.pro.dict.yaml" \
-            "shared/dicts/moe.dict.yaml" \
-            "file"
+          # 将 zian 系列词库独立分离到 dicts_zian 目录
+          echo "分离 dicts_zian 目录..."
 
-          # 复制一份到 shared/ 目录下
-          echo "复制 moe.dict.yaml 到 shared/moe.dict.yaml"
-          cp -f "shared/dicts/moe.dict.yaml" "shared/moe.dict.yaml"
+          # 创建需要的目录
+          TARGET_ZIAN_DIR="shared/dicts_zian"
+          mkdir -p "$TARGET_ZIAN_DIR"
 
-          # 如果 moe.dict.yaml 发生了更新，将复制生成的文件也加入强制更新列表
-          if grep -q "shared/dicts/moe.dict.yaml" "$UPDATED_PATHS_FILE" 2>/dev/null; then
-            echo "shared/moe.dict.yaml" >> "$UPDATED_PATHS_FILE"
+          if ls shared/dicts/*.zian.pro.dict.yaml 1> /dev/null 2>&1; then
+            mv shared/dicts/*.zian.pro.dict.yaml "$TARGET_ZIAN_DIR/"
+            echo "  ✅ zian 词库已成功移动到 $TARGET_ZIAN_DIR/"
+
+            # 同步更新机制：如果 shared/dicts 触发了更新，把 dicts_zian 也加入强制上传队列
+            if grep -q "shared/dicts/" "$UPDATED_PATHS_FILE" 2>/dev/null; then
+              echo "$TARGET_ZIAN_DIR" >> "$UPDATED_PATHS_FILE"
+            fi
+          else
+            echo "  ⚠️ 未能在 shared/dicts/ 中找到 zian 系列词库"
           fi
 
-          # 3. wanxiang-lts-zh-hans.gram -> shared/
+          # 2. wanxiang-lts-zh-hans.gram -> shared/
           process_asset \
             "wanxiang-lts-zh-hans.gram" \
             "release_asset" \
@@ -284,7 +283,7 @@ jobs:
             "shared/wanxiang-lts-zh-hans.gram" \
             "file"
 
-          # 4. rime-wanxiang-moqi-fuzhu.zip -> wanxiang/ (排除 dicts, custom)
+          # 3. rime-wanxiang-moqi-fuzhu.zip -> wanxiang/ (排除 dicts, custom)
           process_asset \
             "rime-wanxiang-moqi-fuzhu" \
             "release_asset" \
@@ -296,7 +295,7 @@ jobs:
             "extract" \
             "dicts,custom"
 
-          # 5. wanxiang_yoemin 仓库 -> yoemin/
+          # 4. wanxiang_yoemin 仓库 -> yoemin/
           process_asset \
             "wanxiang_yoemin" \
             "commit" \
