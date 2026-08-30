@@ -135,8 +135,8 @@ jobs:
             echo "  当前版本: $last_version"
             echo "  最新版本: $latest_version"
 
-            # 缓存文件路径
-            local cached_file="downloads/$(basename "$download_url")"
+            # 缓存文件路径 (避免文件名冲突)
+            local cached_file="downloads/${name}_$(basename "$download_url")"
             local temp_file=""
 
             if [ "$latest_version" = "$last_version" ] && [ "$CACHE_HIT" = "true" ] && [ -f "$cached_file" ]; then
@@ -253,14 +253,14 @@ jobs:
             "" \
             "dicts-pro"
 
-          # 2. moqi_moe.dict.yaml -> shared/dicts/moe.dict.yaml
+          # 2. moegirl.pro.dict.yaml -> shared/dicts/moe.dict.yaml
           process_asset \
-            "moqi_moe.dict.yaml" \
-            "release_asset" \
-            "suiginko/moetype" \
-            "latest" \
-            "moqi_moe.dict.yaml" \
-            "https://github.com/suiginko/moetype/releases/latest/download/moqi_moe.dict.yaml" \
+            "moegirl.pro.dict.yaml" \
+            "commit" \
+            "yuanz-12/momo" \
+            "main" \
+            "" \
+            "https://raw.githubusercontent.com/yuanz-12/momo/main/dicts-pro/moegirl.pro.dict.yaml" \
             "shared/dicts/moe.dict.yaml" \
             "file"
 
