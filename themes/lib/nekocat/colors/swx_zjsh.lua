@@ -56,14 +56,17 @@ local zjsh = {
     -- 侧边栏
     sidebar_back_color                     = IMG .. "w.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG .. "w.9.png",
+    liquid_keyboard_divider_color          = "#D4E0D6",
+
     -- 独立按键配色
     func_key_back_color                    = IMG .. "w.9.png",
     shift_key_back_color                   = IMG .. "gn.9.png",
     clear_key_back_color                   = IMG .. "gn.9.png",
     lookup_key_back_color                  = IMG .. "gn.9.png",
-    q_key_back_color                       = IMG .. "q.9.png",
-    e_key_back_color                       = IMG .. "q.9.png",
-    t_key_back_color                       = IMG .. "q.9.png",
+    w_key_back_color                       = IMG .. "q.9.png",
+    r_key_back_color                       = IMG .. "q.9.png",
     u_key_back_color                       = IMG .. "q.9.png",
     o_key_back_color                       = IMG .. "q.9.png",
     s_key_back_color                       = IMG .. "q.9.png",
@@ -137,14 +140,17 @@ local zjsh = {
     -- 侧边栏
     sidebar_back_color                     = IMG_D .. "w.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG_D .. "w.9.png",
+    liquid_keyboard_divider_color          = "#313432",
+
     -- 独立按键配色
     func_key_back_color                    = IMG_D .. "w.9.png",
     shift_key_back_color                   = IMG_D .. "gn.9.png",
     clear_key_back_color                   = IMG_D .. "gn.9.png",
     lookup_key_back_color                  = IMG_D .. "gn.9.png",
-    q_key_back_color                       = IMG_D .. "q.9.png",
-    e_key_back_color                       = IMG_D .. "q.9.png",
-    t_key_back_color                       = IMG_D .. "q.9.png",
+    w_key_back_color                       = IMG_D .. "q.9.png",
+    r_key_back_color                       = IMG_D .. "q.9.png",
     u_key_back_color                       = IMG_D .. "q.9.png",
     o_key_back_color                       = IMG_D .. "q.9.png",
     s_key_back_color                       = IMG_D .. "q.9.png",

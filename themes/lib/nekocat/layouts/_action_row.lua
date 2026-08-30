@@ -19,29 +19,28 @@ return function(opts)
   local action = row {
     keys = {
       key(merge(S.num, key {
-        click = "KeyboardNumber",
+        click = "LiquidHistory",
         label_symbol = { { text = "ic@calculator-variant" } },
         popup = { "Calculator", "ThemeReload", "Deploy" },
         has_menu = has_menu,
-        width = 0.15,
+        width = 0.157,
+        key_text_size = func_key_text_size
+      })),
+      key(merge(S.switch, key {
+        click = "KeyboardNumber",
+        long_click = "ColorList",
+        hint = { { text = "ic@list-box-outline" } },
+        swipe_down = "SchemeList",
+        width = 0.11,
         key_text_size = func_key_text_size
       })),
       key(merge(S.comma, key {
-        click = "/",
-        label_symbol = { { text = "[" } },
-        swipe_up = "[",
-        hint = { { text = "ic@list-box-outline" } },
-        swipe_down = "SchemeList",
-        key_text_size = func_key_text_size,
-        key_text_offset_y = -2
-      })),
-      key(merge(S.period, key {
         label = { { text = "，" } },
         click = ",",
-        label_symbol = { { text = "]" } },
-        swipe_up = "]",
+        long_click = "[",
         hint = { { text = "ic@palette-swatch-outline" } },
         swipe_down = "ThemeList",
+        width = 0.1,
         key_text_size = func_key_text_size,
         key_text_offset_y = -2
       })),
@@ -52,16 +51,15 @@ return function(opts)
         hint = { { text = "◕ ‿ ◕" } },
         swipe_down = "LiquidEmoji",
         key_text_size = 15,
-        key_text_offset_y = 1,
-        width = 0.3
+        key_text_offset_y = 1
       })),
-      key(merge(S.slash, key {
+      key(merge(S.period, key {
         label = { { text = "。" } },
         click = ".",
-        label_symbol = { { text = "'", bold = true, scale = 1.5 } },
-        swipe_up = "'",
+        long_click = "]",
         hint = { { text = "ic@lightbulb-outline" } },
         swipe_down = "HintSwitch",
+        width = 0.1,
         key_text_size = func_key_text_size,
         key_text_offset_y = -1
       })),
@@ -71,13 +69,14 @@ return function(opts)
         long_click = "KeyboardList",
         hint = { { text = "ic@web" } },
         swipe_down = "IMESwitch",
-        key_text_size = func_key_text_size
+        width = 0.11,
+        key_text_size = func_key_text_size,
+        key_text_offset_y = 2
       })),
       key(merge(S.enter, key {
         label = { { text = "enter_labels" } },
         click = "Enter",
-        long_click = "ColorList",
-        width = 0.15,
+        width = 0.157,
         key_text_size = func_key_text_size
       }))
     }
@@ -86,10 +85,10 @@ return function(opts)
   local extra = row {
     height = 0.085,
     keys = {
-      key(merge(extra_style, { click = "IMESwitch", width = 0.17 })),
-      key(merge(extra_style, { label = { { text = "ic@arrow-left-bold-outline" } }, click = "Up", width = 0.1 })),
+      key(merge(extra_style, { label = { { text = "ic@web" } }, click = "IMESwitch", width = 0.17 })),
+      key(merge(extra_style, { click = "AltLeft", width = 0.1 })),
       key(merge(extra_style, { click = "SlideCursor" })),
-      key(merge(extra_style, { label = { { text = "ic@arrow-right-bold-outline" } }, click = "Down", width = 0.1 })),
+      key(merge(extra_style, { click = "AltRight", width = 0.1 })),
       key(merge(extra_style, { label = { { text = "ic@clipboard-text-outline" } }, click = "WindowClipboard", width = 0.17 }))
     }
   }

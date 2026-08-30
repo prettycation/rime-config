@@ -1,5 +1,5 @@
 local toolbar = toolbar {
-  button_font = { "LXGWWenKaiGB-Medium.ttf" },
+  button_font = { "LXGW975YuanSC-400W.ttf" },
   back_style = "ic@chevron-triple-left",
   primary_button = {
     action = "KeyboardSettings",
@@ -38,15 +38,6 @@ local toolbar = toolbar {
       }
     },
     {
-      action = "LiquidHistory",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@sticker-emoji"
-      }
-    },
-    {
       action = "WindowClipboard",
       foreground = {
         font_size = 18,
@@ -56,21 +47,21 @@ local toolbar = toolbar {
       }
     },
     {
-      action = "KeyboardEditor",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@cursor-move"
-      }
-    },
-    {
       action = "Redo",
       foreground = {
         font_size = 18,
         padding = 2,
         normal = "text_color",
         style = "ic@rotate-right"
+      }
+    },
+    {
+      action = "KeyboardEditor",
+      foreground = {
+        font_size = 18,
+        padding = 2,
+        normal = "text_color",
+        style = "ic@cursor-move"
       }
     },
     {
@@ -102,5 +93,3 @@ local toolbar = toolbar {
     }
   }
 }
-
-return toolbar

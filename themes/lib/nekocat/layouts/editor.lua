@@ -28,7 +28,7 @@ local keyboard = keyboard {
     },
     row {
       keys = {
-        key { label = { { text = "符号" } }, click = "LiquidAscii" },
+        key { label = { { text = "符号" } }, click = "LiquidHistory" },
         key(merge(S.func, { click = "Left" })),
         key { label = { { text = "ic@select-compare" } }, click = "Shift" },
         key(merge(S.func, { click = "Right" })),

@@ -20,11 +20,10 @@ local keyboard = keyboard {
       height = 0.3,
       keys = {
         key { spacer = true, width = 0.1 },
-        key(merge(settings, key { click = "Schemazrm", hint = { { text = "自然码" } } })),
-        key(merge(settings, key { click = "Schemazrm18keys", hint = { { text = "自然码 18 键" } } })),
-        key(merge(settings, key { click = "Schemazrm14keys", hint = { { text = "自然码 14 键" } } })),
-        key(merge(settings, key { click = "Schemal17keyszrm", hint = { { text = "乱序 17 自然辅" } } })),
-
+        key(merge(settings, key { click = "Schemaflypy", hint = { { text = "小鹤" } } })),
+        key(merge(settings, key { click = "Schemaflypy18keys", hint = { { text = "小鹤18键" } } })),
+        key(merge(settings, key { click = "Schemaflypy14keys", hint = { { text = "小鹤14键" } } })),
+        key(merge(settings, key { click = "Schemal17keysflypy", hint = { { text = "乱序17小鹤辅" } } })),
         key { spacer = true, width = 0.1 }
       }
     },
@@ -32,10 +31,11 @@ local keyboard = keyboard {
       height = 0.3,
       keys = {
         key { spacer = true, width = 0.1 },
-        key(merge(settings, key { click = "Schemaflypy", hint = { { text = "小鹤" } } })),
-        key(merge(settings, key { click = "Schemaflypy18keys", hint = { { text = "小鹤 18 键" } } })),
-        key(merge(settings, key { click = "Schemaflypy14keys", hint = { { text = "小鹤 14 键" } } })),
-        key(merge(settings, key { click = "Schemal17keysflypy", hint = { { text = "乱序 17 小鹤辅" } } })),
+        key(merge(settings, key { click = "Keyboardzrm", hint = { { text = "自然码" } } })),
+        key(merge(settings, key { click = "Keyboardzrm18keys", hint = { { text = "自然码18键" } } })),
+        key(merge(settings, key { click = "Keyboardzrm14keys", hint = { { text = "自然码14键" } } })),
+        key(merge(settings, key { click = "Keyboardl17keyszrm", hint = { { text = "乱序17自然辅" } } })),
+
         key { spacer = true, width = 0.1 }
       }
     },

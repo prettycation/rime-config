@@ -56,8 +56,16 @@ local lzyy = {
     -- 侧边栏
     sidebar_back_color                     = IMG .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#CDC2BF",
+
     -- 独立按键配色
     func_key_back_color                    = IMG .. "kgh.9.png",
+    comma_key_back_color                   = IMG .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG .. "zjh.9.png",
+    period_key_back_color                  = IMG .. "zj.9.png",
+    period_hilited_key_back_color          = IMG .. "zjh.9.png",
     shift_key_back_color                   = IMG .. "gn.9.png",
     clear_key_back_color                   = IMG .. "gn.9.png",
     lookup_key_back_color                  = IMG .. "gn.9.png",
@@ -123,8 +131,16 @@ local lzyy = {
     -- 侧边栏
     sidebar_back_color                     = IMG_D .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG_D .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#3C3736",
+
     -- 独立按键配色
     func_key_back_color                    = IMG_D .. "gnf.9.png",
+    comma_key_back_color                   = IMG_D .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG_D .. "zjh.9.png",
+    period_key_back_color                  = IMG_D .. "zj.9.png",
+    period_hilited_key_back_color          = IMG_D .. "zjh.9.png",
     shift_key_back_color                   = IMG_D .. "gn.9.png",
     clear_key_back_color                   = IMG_D .. "gn.9.png",
     lookup_key_back_color                  = IMG_D .. "gn.9.png",

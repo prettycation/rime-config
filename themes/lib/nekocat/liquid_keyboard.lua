@@ -1,24 +1,10 @@
 ---@type LiquidKeyboard
 local liquid = liquid {
-  row = 6,
-  key_height = 40,
-  single_width = 45,
-  margin_x = 2,
-  fixed_key_bar = {
-    position = "BOTTOM",
-    keys = {
-      { label = "返回", click = "LiquidExit" },
-      { label = "导航", click = "LiquidTabs" },
-      { label = "删除", click = "Delete" },
-      { label = "空格", click = "Space" },
-      { label = "退格", click = "BackSpace" },
-      { label = "剪贴", click = "WindowClipboard" },
-      { label = "回车", click = "Enter" }
-    }
-  },
+  columns = 6,
+  row = 5,
+  bottom_padding = 20,
   keyboards = {
-    { id = "tabs", type = "TABS", name = "导航" },
-    { id = "history", type = "HISTORY", name = "历史" },
+    { id = "history", type = "HISTORY", name = "常用" },
     { id = "ascii", type = "SINGLE", name = "英文",
       keys = {
         -- 常用标点
