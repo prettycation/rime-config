@@ -119,6 +119,7 @@ jobs:
             local dest_path=$7
             local type=$8
             local excludes=${9:-""}
+            local sub_dir=${10:-""} # 允许指定从压缩包中只提取特定的子目录
 
             echo "::group::检查 $name"
 
@@ -165,15 +166,32 @@ jobs:
 
               # 智能判断解压内容结构
               local entry_count=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | wc -l)
+              local source_dir="$extract_dir"
+
+              # 处理 GitHub 源码包常见的“外层包了一个文件夹”的情况
               if [ "$entry_count" -eq 1 ]; then
                 local single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | head -n 1)
                 if [ -d "$single_entry" ]; then
-                  cp -a "$single_entry"/. "$target_dir/"
+                  source_dir="$single_entry"
                 else
-                  cp -a "$single_entry" "$target_dir/"
+                  if [ -z "$sub_dir" ]; then
+                    cp -a "$single_entry" "$target_dir/"
+                    source_dir="" # 标记已处理，后续跳过
+                  fi
                 fi
-              else
-                cp -a "$extract_dir"/. "$target_dir/"
+              fi
+
+              # 如果指定了要提取的子目录，并且之前没有直接处理完毕
+              if [ -n "$source_dir" ]; then
+                if [ -n "$sub_dir" ]; then
+                  if [ -d "$source_dir/$sub_dir" ]; then
+                    source_dir="$source_dir/$sub_dir"
+                    echo "  🔍 锁定子目录: $sub_dir"
+                  else
+                    echo "  ⚠️ 警告: 压缩包内未找到指定的子目录 '$sub_dir'"
+                  fi
+                fi
+                cp -a "$source_dir"/. "$target_dir/"
               fi
 
               rm -rf "$extract_dir"
@@ -222,16 +240,18 @@ jobs:
           echo "开始同步资产..."
           echo "========================================"
 
-          # 1. pro-moqi-fuzhu-dicts.zip -> shared/dicts/
+          # 1. 下载 momo 仓库 main 分支中的 dicts-pro 目录内容 -> shared/dicts/
           process_asset \
-            "pro-moqi-fuzhu-dicts" \
-            "release_asset" \
-            "amzxyz/rime-wanxiang" \
-            "dict-nightly" \
-            "pro-moqi-fuzhu-dicts.zip" \
-            "https://github.com/amzxyz/rime-wanxiang/releases/download/dict-nightly/pro-moqi-fuzhu-dicts.zip" \
+            "momo-dicts-pro" \
+            "commit" \
+            "yuanz-12/momo" \
+            "main" \
+            "" \
+            "https://github.com/yuanz-12/momo/archive/refs/heads/main.zip" \
             "shared/dicts/" \
-            "extract"
+            "extract" \
+            "" \
+            "dicts-pro"
 
           # 2. moqi_moe.dict.yaml -> shared/dicts/moe.dict.yaml
           process_asset \
