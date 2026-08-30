@@ -63,6 +63,7 @@ jobs:
           SHA_DIR=".github/sync/sha"
           VERSIONS_FILE="$SHA_DIR/versions.json"
           HAS_UPDATE="false"
+          UPDATED_PATHS_FILE=$(mktemp) # 用于记录所有发生更新的文件/目录路径
 
           mkdir -p "$SHA_DIR" "downloads"
           if [ ! -f "$VERSIONS_FILE" ]; then
@@ -194,12 +195,20 @@ jobs:
               echo "  ✅ 文件已保存到 $dest_path"
             fi
 
-            # 只有当版本变化时，才更新记录文件
+            # 只有当版本变化时，才更新记录文件并收集路径
             if [ "$latest_version" != "$last_version" ]; then
               local temp_json=$(mktemp)
               jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
               mv "$temp_json" "$VERSIONS_FILE"
               HAS_UPDATE="true"
+
+              # 记录更新的路径供后续 Rclone 强制上传使用
+              if [ "$type" = "extract" ]; then
+                echo "${dest_path%/}" >> "$UPDATED_PATHS_FILE"
+              else
+                echo "$dest_path" >> "$UPDATED_PATHS_FILE"
+              fi
+
               echo "版本记录已更新"
             fi
 
@@ -238,6 +247,11 @@ jobs:
           # 复制一份到 shared/ 目录下
           echo "复制 moe.dict.yaml 到 shared/moe.dict.yaml"
           cp -f "shared/dicts/moe.dict.yaml" "shared/moe.dict.yaml"
+
+          # 如果 moe.dict.yaml 发生了更新，将复制生成的文件也加入强制更新列表
+          if grep -q "shared/dicts/moe.dict.yaml" "$UPDATED_PATHS_FILE" 2>/dev/null; then
+            echo "shared/moe.dict.yaml" >> "$UPDATED_PATHS_FILE"
+          fi
 
           # 3. wanxiang-lts-zh-hans.gram -> shared/
           process_asset \
@@ -337,12 +351,27 @@ jobs:
           pass = $OBSCURED_PASS
           EOF
 
-            # 2. 使用 rclone sync 将当前目录文件同步到 WebDAV 的 LyraIME 文件夹
             echo "☁️  同步配置文件到 WebDAV 的 LyraIME 目录..."
             echo "  目标: $WEBDAV_URL/LyraIME/"
 
-            # 使用 sync 模式：会使 WebDAV 上的 LyraIME 目录与本地完全一致（删除多余的旧文件）
-            # 排除 .git, .github 等目录及文件
+            # 2. 优先处理确定有更新的路径，进行强制覆写 (绕过体积校验)
+            if [ -s "$UPDATED_PATHS_FILE" ]; then
+              echo "  🚀 检测到部分资产有实质性版本更新，开始执行强制覆写..."
+              # 去重后逐行读取
+              sort -u "$UPDATED_PATHS_FILE" | while IFS= read -r upath; do
+                if [ -n "$upath" ] && [ -e "$upath" ]; then
+                  echo "    -> 强制上传: $upath"
+                  if [ -d "$upath" ]; then
+                    rclone copy "$upath" "webdav:LyraIME/$upath" --ignore-times -v
+                  else
+                    rclone copyto "$upath" "webdav:LyraIME/$upath" --ignore-times -v
+                  fi
+                fi
+              done
+            fi
+
+            # 3. 使用 rclone sync 将当前目录文件同步到 WebDAV 的 LyraIME 文件夹
+            # 这一步负责接管常规上传和清理远端被删除的旧文件
             rclone sync . webdav:LyraIME \
               --exclude ".git/**" \
               --exclude ".github/**" \
@@ -354,7 +383,9 @@ jobs:
             echo "  ✅ WebDAV 同步完成！"
           fi
 
-          # 3. 如果版本有更新，机器人提交 SHA 记录到当前分支
+          # ============================================
+          # 如果版本有更新，提交哈希记录到 Git
+          # ============================================
           if [ "$HAS_UPDATE" = "true" ]; then
             echo ""
             echo "准备通过机器人提交哈希记录..."
