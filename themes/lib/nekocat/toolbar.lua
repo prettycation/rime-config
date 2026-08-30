@@ -92,7 +92,7 @@ local toolbar = toolbar {
       }
     },
     {
-      action = "OneHandedSwitch",
+      action = "OneHandSwitch",
       foreground = {
         font_size = 18,
         padding = 2,
