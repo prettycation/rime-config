@@ -54,6 +54,10 @@ local colors = {
     -- 侧边栏
     sidebar_back_color                     = IMG .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#DED4CE",
+
     -- 独立按键配色
     func_key_back_color                    = IMG .. "gn.9.png",
     space_key_back_color                   = IMG .. "zj.9.png",

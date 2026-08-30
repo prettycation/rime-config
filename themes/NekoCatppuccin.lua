@@ -4,7 +4,7 @@
 -- 亮色模式：Catppuccin Latte  暗色模式：Catppuccin Mocha
 
 local font_combo = {
-  "LXGWWenKaiGB-Medium.ttf", "OpenMoji.ttf", "CarlsonFont.ttf",
+  "LXGW975YuanSC-400W.ttf", "OpenMoji.ttf", "CarlsonFont.ttf",
   "SourceHanSans.otf", "PlangothicP1.otf", "PlangothicP2.otf"
 }
 
@@ -13,7 +13,7 @@ local theme = theme {
   -- 元数据
   -- ========================================================================
   name = "NekoCatppuccin",
-  version = "5.0",
+  version = "5.5",
   author = "Carlson24(鹤衔春雪)",
 
   -- ========================================================================
@@ -27,6 +27,7 @@ local theme = theme {
     horizontal_gap = 2,                         -- [int] 键水平间距 (px)
     vertical_gap = 1,                           -- [int] 键盘行距 (px)
     round_corner = 10,                          -- [float] 按键圆角半径
+    content_padding = 4,                        -- [int] 裁切边距
     key_border = 1,                             -- [int] 按键边框宽度
     key_shadow_radius = 0,                      -- [float] 按键阴影半径
     key_shadow_direction = { "right", "down" }, -- [string] 按键阴影位置

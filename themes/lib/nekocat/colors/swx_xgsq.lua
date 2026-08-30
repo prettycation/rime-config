@@ -58,11 +58,19 @@ local xgsq = {
     -- 侧边栏
     sidebar_back_color                     = IMG .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#CDD9E6",
+
     -- 独立按键配色
     func_key_back_color                    = IMG .. "gnf.9.png",
     g_key_back_color                       = IMG .. "g.9.png",
     g_hilited_key_back_color               = IMG .. "gh.9.png",
     kp5_key_back_color                     = IMG .. "5.9.png",
+    comma_key_back_color                   = IMG .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG .. "zjh.9.png",
+    period_key_back_color                  = IMG .. "zj.9.png",
+    period_hilited_key_back_color          = IMG .. "zjh.9.png",
     backspace_key_back_color               = IMG .. "tg.9.png",
     clear_key_back_color                   = IMG .. "gn.9.png",
     shift_key_back_color                   = IMG .. "gn.9.png",
@@ -124,11 +132,19 @@ local xgsq = {
     -- 侧边栏
     sidebar_back_color                     = IMG_D .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG_D .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#272B2F",
+
     -- 独立按键配色
     func_key_back_color                    = IMG_D .. "gnf.9.png",
     g_key_back_color                       = IMG_D .. "g.9.png",
     g_hilited_key_back_color               = IMG_D .. "gh.9.png",
     kp5_key_back_color                     = IMG_D .. "5.9.png",
+    comma_key_back_color                   = IMG_D .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG_D .. "zjh.9.png",
+    period_key_back_color                  = IMG_D .. "zj.9.png",
+    period_hilited_key_back_color          = IMG_D .. "zjh.9.png",
     backspace_key_back_color               = IMG_D .. "tg.9.png",
     clear_key_back_color                   = IMG_D .. "gn.9.png",
     shift_key_back_color                   = IMG_D .. "gn.9.png",

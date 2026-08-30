@@ -5,7 +5,7 @@ local M = {}
 
 M.auxhint = key {
   key_text_offset_y = -4,
-  key_hint_offset_y = 1
+  key_text_size = 18
 }
 
 M.lsspdynamic = key {

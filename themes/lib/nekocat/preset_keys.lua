@@ -26,10 +26,12 @@ local pk = {
   Left               = { label = "ic@arrow-left-bold", repeatable = true, send = "Left" },
   Right              = { label = "ic@arrow-right-bold", repeatable = true, send = "Right" },
   Up                 = { label = "ic@arrow-up-bold", repeatable = true, send = "Up" },
-  Clear              = { label = "ic@close-octagon-outline", send = "Escape" },                -- 清空输入
-  SidebarClear       = { label = "ic@close-octagon-outline", command = "sidebar_clear" },      -- 侧边栏布局专用清空
-  DynamicClear       = { label = "ic@close-octagon-outline", command = "dynamic_clear" },      -- 动态布局专用清空
-  SlideCursor        = { slide_cursor = true },                                                -- 软光标
+  Clear              = { label = "ic@close-octagon-outline", send = "Escape" },                      -- 清空输入
+  SidebarClear       = { label = "ic@close-octagon-outline", command = "sidebar_clear" },            -- 侧边栏布局专用清空
+  DynamicClear       = { label = "ic@close-octagon-outline", command = "dynamic_clear" },            -- 动态布局专用清空
+  SlideCursor        = { slide_cursor = true },                                                      -- 软光标
+  AltLeft            = { label = "ic@arrow-left-bold-outline", repeatable = true, send = "Up" },     -- 上一个候选
+  AltRight           = { label = "ic@arrow-right-bold-outline", repeatable = true, send = "Down" },  -- 下一个候选
 
   -- App 功能
   VoiceAssist        = { label = "ic@microphone", send = "VOICE_ASSIST" },                                                                         -- 语音识别
@@ -73,13 +75,13 @@ local pk = {
   KeyboardLayouts    = { label = "ic@keyboard-variant", send = "Eisu_toggle", select = "layouts" },      -- 布局界面
   Keyboard45Eng      = { label = "\u{F840}", send = "Eisu_toggle", select = "english" },                 -- 英文布局
   KeyboardT9Number   = { label = "ic@numeric", send = "Eisu_toggle", select = "t9_number" },             -- T9 用数字
+  Keyboardzrm        = { label = "\u{F842}", send = "Eisu_toggle", select = "wanxiang_zrm" },            -- 自然码布局
+  Keyboardzrm18keys  = { label = "\u{F844}", send = "Eisu_toggle", select = "wanxiang_zrm_18keys" },     -- 自然码 18 键
+  Keyboardzrm14keys  = { label = "\u{F846}", send = "Eisu_toggle", select = "wanxiang_zrm_14keys" },     -- 自然码 14 键
+  Keyboardl17keyszrm = { label = "\u{F845}", send = "Eisu_toggle", select = "wanxiang_l17keys_zrm" },    -- 乱序 17 自然辅
 
   -- 方案切换
   SchemaEnglish      = { label = "\u{F840}", command = "set_schema", option = "wanxiang_english" },       -- 万象英文
-  Schemazrm          = { label = "\u{F842}", command = "set_schema", option = "wanxiang_zrm" },           -- 万象自然码
-  Schemazrm18keys    = { label = "\u{F844}", command = "set_schema", option = "wanxiang_zrm_18keys" },    -- 万象自然码 18 键
-  Schemazrm14keys    = { label = "\u{F846}", command = "set_schema", option = "wanxiang_zrm_14keys" },    -- 万象自然码 14 键
-  Schemal17keyszrm   = { label = "\u{F845}", command = "set_schema", option = "wanxiang_l17keys_zrm" },   -- 万象乱序 17 自然辅
   Schemaflypy        = { label = "\u{F842}", command = "set_schema", option = "wanxiang_flypy" },         -- 万象小鹤
   Schemaflypy18keys  = { label = "\u{F844}", command = "set_schema", option = "wanxiang_flypy_18keys" },  -- 万象小鹤 18 键
   Schemaflypy14keys  = { label = "\u{F846}", command = "set_schema", option = "wanxiang_flypy_14keys" },  -- 万象小鹤 14 键
@@ -93,11 +95,8 @@ local pk = {
   WindowClipboard    = { label = "ic@clipboard-list-outline", command = "clipboard_window" }, -- 剪贴板
 
   -- 流体键盘
-  LiquidExit         = { label = "ic@keyboard", command = "liquid_keyboard", option = "-1" },           -- 退出流体键盘
-  LiquidTabs         = { label = "ic@format-list-text", command = "liquid_keyboard", option = "tabs" }, -- 流体键盘导航页面
-  LiquidHistory      = { label = "ic@history", command = "liquid_keyboard", option = "history" },       -- 符号历史记录
-  LiquidAscii        = { label = "ic@symbol", command = "liquid_keyboard", option = "ascii" },          -- ascii 符号
-  LiquidEmoji        = { label = "ic@cat", command = "liquid_keyboard", option = "emoji_smileys" },     -- emoji 符号
+  LiquidHistory      = { label = "ic@symbol", command = "liquid_keyboard", option = "history" },    -- 符号历史记录
+  LiquidEmoji        = { label = "ic@cat", command = "liquid_keyboard", option = "emoji_smileys" }, -- emoji 符号
 
   -- Rime 方案相关
   CandDelete         = { label = "ic@delete-forever", send = "Control+Delete" }, -- 删除选中候选
@@ -121,7 +120,7 @@ local pk = {
   SelectToneTwo      = { label = "\u{F822}", send = "7" }, -- 音调二声
   SelectToneThree    = { label = "\u{F823}", send = "8" }, -- 音调三声
   SelectToneFour     = { label = "\u{F824}", send = "9" }, -- 音调四声
-  SelectToneNull     = { label = "・", send = "0" }, -- 音调无声
+  SelectToneNull     = { label = "\u{F825}", send = "0" }, -- 音调无声
 
 
   -- 计算器函数

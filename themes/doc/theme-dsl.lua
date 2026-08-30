@@ -533,6 +533,8 @@
 ---@field keyboard_back_color?                    Color        # 键盘背景色（回退至 border_color）
 ---@field keyboard_background?                    Color        # 键盘背景（回退至 keyboard_back_color）
 ---@field liquid_keyboard_background?             Color        # 液态键盘背景（回退至 keyboard_back_color）
+---@field liquid_keyboard_board?                  Color        # 液态键盘边框（回退至 key_border_color）
+---@field liquid_keyboard_divider_color?          Color        # 液态键盘分割线颜色（回退至 candidate_separator_color）
 ---@field text_back_color?                        Color        # 编码区背景（回退至 back_color）
 ---@field long_text_color?                        Color        # 长文本/剪贴板文字（回退至 key_text_color）
 ---@field long_text_back_color?                   Color        # 长文本/剪贴板背景（回退至 key_back_color）
@@ -1153,6 +1155,7 @@
 ---@field horizontal_gap?                     integer         # 键水平间距 (px)
 ---@field vertical_gap?                       integer         # 键盘行距 (px)
 ---@field round_corner?                       number          # 按键圆角半径
+---@field content_padding?                    integer         # 面板内容上下内缩（适配图片背景的透明边框区，默认 0）
 ---@field key_shadow_radius?                  number          # 按键阴影模糊半径（0=无阴影）
 ---@field key_shadow_direction?               string[]        # 按键阴影方向（"left"/"up"/"right"/"down" 组合，如 {"down","right"}）
 ---@field key_border?                         integer         # 按键边框宽度
@@ -1316,27 +1319,6 @@
 -- 液态键盘 (LiquidKeyboard)
 -- ============================================================================
 
----@class EdgeInsets
----@field left?             number                # 左间距
----@field top?              number                # 上间距
----@field right?            number                # 右间距
----@field bottom?           number                # 下间距
-
---- 液态键盘固定按键项
----@class FixedKeyItem
----@field click?            string                # 点击动作
----@field label?            string                # 显示标签
----@field width?            number?               # 宽度（nil 表示自适应）
----@field height?           number?               # 高度（nil 表示自适应）
----@field margin?           EdgeInsets?           # 外边距
----@field padding?          EdgeInsets?           # 内边距
----@field is_string_format? boolean               # 是否以字符串格式处理
-
---- 液态键盘固定按键栏
----@class KeyBar
----@field keys?             FixedKeyItem[]        # 固定按键列表
----@field position?         KeyBarPosition        # 栏位位置（默认 BOTTOM）
-
 --- 液态键盘按键项
 ---@class KeyItem
 ---@field text?             string                # 主文本
@@ -1352,10 +1334,9 @@
 --- 液态键盘。
 --- 可选——不配置时使用默认值。
 ---@class LiquidKeyboard
----@field single_width?     integer               # 单键宽度
----@field key_height?       integer               # 按键高度
----@field margin_x?         number                # 水平外边距
----@field fixed_key_bar?    KeyBar                # 固定按键栏
+---@field columns?          integer               # 每行符号数（默认 6）
+---@field rows?             integer               # 可见行数（默认 5）
+---@field bottom_padding?   integer               # 底部抬高
 ---@field keyboards?        LiquidKeyboardPanel[] # 面板列表
 
 -- ============================================================================

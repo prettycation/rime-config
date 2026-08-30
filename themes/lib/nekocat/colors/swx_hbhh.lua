@@ -56,9 +56,17 @@ local hbhh = {
     -- 侧边栏
     sidebar_back_color                     = IMG .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#D0D3DC",
+
     -- 独立按键配色
     func_key_back_color                    = IMG .. "gn.9.png",
     func_hilited_key_back_color            = IMG .. "gnh.9.png",
+    comma_key_back_color                   = IMG .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG .. "zjh.9.png",
+    period_key_back_color                  = IMG .. "zj.9.png",
+    period_hilited_key_back_color          = IMG .. "zjh.9.png",
     enter_key_back_color                   = IMG .. "hc.9.png",
     enter_hilited_key_back_color           = IMG .. "hch.9.png",
     enter_key_text_color                   = "#F9F9F9",
@@ -113,9 +121,17 @@ local hbhh = {
     -- 侧边栏
     sidebar_back_color                     = IMG_D .. "zj.9.png",
 
+    -- 流体键盘
+    liquid_keyboard_background             = IMG_D .. "zj.9.png",
+    liquid_keyboard_divider_color          = "#3A3A3A",
+
     -- 独立按键配色
     func_key_back_color                    = IMG_D .. "gn.9.png",
-    func_hilited_key_back_color            = IMG_D .. "gnh.9.png"
+    func_hilited_key_back_color            = IMG_D .. "gnh.9.png",
+    comma_key_back_color                   = IMG_D .. "zj.9.png",
+    comma_hilited_key_back_color           = IMG_D .. "zjh.9.png",
+    period_key_back_color                  = IMG_D .. "zj.9.png",
+    period_hilited_key_back_color          = IMG_D .. "zjh.9.png"
   })
 }
 
