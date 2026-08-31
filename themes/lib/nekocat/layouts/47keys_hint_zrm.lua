@@ -1,7 +1,7 @@
 local font_offset = safe_require("nekocat.font_offset")
 local hint_offset = font_offset.auxhint
 
-local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard {
+local keyboard = keyboard(merge(safe_require("nekocat.layouts.47keys"), keyboard {
   name = "自然万象",
   label_transform = "UPPERCASE",
   rows = {
@@ -16,7 +16,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [2] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "亠", "夂", "夊\n" }, color = "rosewater", align = "justify" },
           { text = { "攵", "瓦", "王\n" }, color = { "rosewater", "overlay2", "overlay2" }, align = "justify" },
-          { text = "ia ua", color = "blue" }
+          { text = "[iu]a", color = "blue" }
         } })),
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "阝", "卩", "二\n" }, color = { "rosewater", "rosewater", "overlay2" }, align = "justify" },
@@ -26,12 +26,12 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "亻", "人", "入\n" }, color = "rosewater", align = "justify" },
           { text = { "壬", "肉", "刃\n" }, color = "overlay2", align = "justify" },
-          { text = "uan", color = "blue" }
+          { text = "[uü]an", color = "blue" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "土", "田", "屯\n" }, color = "overlay2", align = "justify" },
           { text = { "它", "太", "台\n" }, color = "overlay2", align = "justify" },
-          { text = { "ue üe" }, color = "blue" }
+          { text = { "[uü]e" }, color = "blue" }
         } })),
         [6] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "讠", "衤", "业\n" }, color = "rosewater", align = "justify" },
@@ -51,12 +51,12 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [9] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "日", "月\n" }, color = "rosewater", align = "justify" },
           { text = { "目", "曰\n" }, color = "rosewater", align = "justify" },
-          { text = { "zy", "o", "uo" }, color = { "red", "blue", "blue" }, bold = { true, false, false }, align = "justify" }
+          { text = { "zy", "u?o" }, color = { "red", "blue", "blue" }, bold = { true, false, false }, align = "justify" }
         } })),
         [10] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丿", "彡", "𤴔\n" }, color = { "lavender", "rosewater", "rosewater" }, align = "justify" },
           { text = { "疋", "攴", "片\n" }, color = "overlay2", align = "justify" },
-          { text = "un", color = "blue" }
+          { text = "[uü]n", color = "blue" }
         } }))
       }
     },
@@ -70,12 +70,12 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "纟", "罒", "龴\n" }, color = "rosewater", align = "justify" },
           { text = { "巳", "厶", "三\n" }, color = "overlay2", align = "justify" },
-          { text = "(i)ong", color = "blue" }
+          { text = { "xi", " i?ong" }, color = { "red", "blue" } }
         } })),
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丶", "乀", "⺈\n" }, color = { "lavender", "lavender", "rosewater" }, align = "justify" },
           { text = { "冫", "氵", "刂\n" }, color = "rosewater", align = "justify" },
-          { text = "i|uang", color = "blue" }
+          { text = "[iu]ang", color = "blue" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "扌", "丰", "缶\n" }, color = { "rosewater", "overlay2", "overlay2" }, align = "justify" },
@@ -105,7 +105,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [10] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "六", "力", "立\n" }, color = "rosewater", align = "justify" },
           { text = { "卤", "耒", "龙\n" }, color = "overlay2", align = "justify" },
-          { text = "ai", color = "blue" }
+          { text = "i?ai", color = "blue" }
         } }))
       }
     },
@@ -114,7 +114,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [2] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "⻊", "廴", "辶\n" }, color = "rosewater", align = "justify" },
           { text = { "卆", "走", "子\n" }, color = "overlay2", align = "justify" },
-          { text = "ei", color = "blue" }
+          { text = { "ji", "ei" }, color = { "red", "blue" }, align = "justify" }
         } })),
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "彳", "心", "忄\n" }, color = "rosewater", align = "justify" },
@@ -124,7 +124,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "艹", "卄", "廾\n" }, color = { "rosewater", "overlay2", "overlay2" }, align = "justify" },
           { text = { "屮", "卝", "廿\n" }, color = "overlay2", align = "justify" },
-          { text = "iao", color = "blue" }
+          { text = { "qi", "iao" }, color = { "red", "blue" }, align = "justify" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "⺮", "𠂤", "爫\n" }, color = "rosewater", align = "justify" },

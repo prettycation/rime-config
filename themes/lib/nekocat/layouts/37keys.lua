@@ -1,6 +1,6 @@
 local S = safe_require("nekocat.colors._key_colors") -- 按键样式
 local func_key_text_size = safe_require("nekocat.font_offset").func_key_text_size
-local action_rows = safe_require("nekocat.layouts._action_row")({ has_menu = true })
+local action_rows = safe_require("nekocat.layouts._action_row")({})
 
 local keyboard = keyboard {
   name = "18 键布局",
@@ -23,25 +23,25 @@ local keyboard = keyboard {
     },
     row {
       keys = {
-        key { spacer = true, width = 0.05 },
+        key(merge(S.slash, key { click = "/", label_symbol = { { text = "ic@lightning-bolt" } }, width = 0.06 })),
         key(merge(S.s, key { label = { { text = " A " } }, click = "a", label_symbol = { { text = "×" } }, swipe_up = "×", popup = { "A", "a" } })),
         key(merge(S.d, key { label = { { text = "S D" } }, click = "s", label_symbol = { { text = "÷" } }, swipe_up = "÷", popup = { "S", "D", "s", "d" } })),
         key(merge(S.f, key { label = { { text = "F G" } }, click = "f", label_symbol = { { text = "<" } }, swipe_up = "<", popup = { "F", "G", "f", "g" } })),
         key(merge(S.h, key { label = { { text = " H " } }, click = "h", label_symbol = { { text = "=" } }, swipe_up = "=", popup = { "H", "h" } })),
         key(merge(S.j, key { label = { { text = "J K" } }, click = "j", label_symbol = { { text = ">" } }, swipe_up = ">", popup = { "J", "K", "j", "k" } })),
-        key(merge(S.k, key { label = { { text = " L " } }, click = "l", label_symbol = { { text = ";" } }, swipe_up = ";", popup = { "L", "l", "·", "§" } })),
-        key { spacer = true, width = 0.05 }
+        key(merge(S.k, key { label = { { text = " L " } }, click = "l", label_symbol = { { text = "'" } }, swipe_up = "'", popup = { "L", "l", "·", "§" } })),
+        key(merge(S.semicolon, key { click = ";", label_symbol = { { text = "ic@numeric-2-box-outline" } }, width = 0.06 }))
       }
     },
     row {
       keys = {
-        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.15 })),
+        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.157 })),
         key(merge(S.x, key { label = { { text = " Z " } }, click = "z", label_symbol = { { text = { "{", "ic@select-all" }, align = "justify" } }, swipe_up = "{", popup = { "Z", "z", "SelectAll" } })),
         key(merge(S.c, key { label = { { text = "X C" } }, click = "x", label_symbol = { { text = { "_", "ic@content-copy" }, align = "justify" } }, swipe_up = "_", popup = { "X", "C", "x", "c", "Copy" } })),
         key(merge(S.v, key { label = { { text = " V " } }, click = "v", label_symbol = { { text = { "}", "ic@content-paste" }, align = "justify" } }, swipe_up = "}", popup = { "V", "v", "Paste" }, swipe_down = "WindowClipboard" })),
         key(merge(S.b, key { label = { { text = "B N" } }, click = "b", label_symbol = { { text = { "|", "ic@content-cut" }, align = "justify" } }, swipe_up = "|", popup = { "B", "N", "b", "n", "Cut" } })),
         key(merge(S.n, key { label = { { text = " M " } }, click = "m", label_symbol = { { text = { "~", "ic@ideogram-cjk" }, align = "justify" } }, swipe_up = "~", popup = { "M", "m", "ZiTools" } })),
-        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.15 }))
+        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.157 }))
       }
     },
     action_rows.action,

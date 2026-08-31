@@ -1,10 +1,10 @@
 ---@type KeyColorStyles
 local S = safe_require("nekocat.colors._key_colors")
 local func_key_text_size = safe_require("nekocat.font_offset").func_key_text_size
-local action_rows = safe_require("nekocat.layouts._action_row")({ mode_switch = true, has_menu = true })
+local action_rows = safe_require("nekocat.layouts._action_row")({ mode_switch = true })
 
 local keyboard = keyboard {
-  name = "45 键布局",
+  name = "47 键布局",
   author = "Carlson24(鹤衔春雪)",
   ascii_mode = false,
   label_transform = "NONE",
@@ -14,10 +14,10 @@ local keyboard = keyboard {
     row {
       keys = {
         key(merge(S.q, key { click = "q", label_symbol = { { text = { " ", "`" }, align = "justify", scale = 1.5 } }, swipe_up = "`", popup = { "Q" } })),
-        key(merge(S.w, key { click = "w", label_symbol = { { text = { " ", "\"" }, align = "justify" } }, swipe_up = "\"", popup = { "W" } })),
+        key(merge(S.w, key { click = "w", label_symbol = { { text = { " ", "~" }, align = "justify" } }, swipe_up = "~", popup = { "W" } })),
         key(merge(S.e, key { click = "e", label_symbol = { { text = { " ", "+" }, align = "justify" } }, swipe_up = "+", popup = { "E" } })),
         key(merge(S.r, key { click = "r", label_symbol = { { text = { " ", "-" }, align = "justify" } }, swipe_up = "-", popup = { "R" } })),
-        key(merge(S.t, key { click = "t", label_symbol = { { text = { " ", ":" }, align = "justify" } }, swipe_up = ":", popup = { "T" } })),
+        key(merge(S.t, key { click = "t", label_symbol = { { text = { " ", "\"" }, align = "justify" } }, swipe_up = "\"", popup = { "T" } })),
         key(merge(S.y, key { click = "y", label_symbol = { { text = { " ", "<" }, align = "justify" } }, swipe_up = "<", popup = { "Y" } })),
         key(merge(S.u, key { click = "u", label_symbol = { { text = { " ", "=" }, align = "justify" } }, swipe_up = "=", popup = { "U" } })),
         key(merge(S.i, key { click = "i", label_symbol = { { text = { " ", ">" }, align = "justify" } }, swipe_up = ">", popup = { "I" } })),
@@ -27,22 +27,22 @@ local keyboard = keyboard {
     },
     row {
       keys = {
-        key { spacer = true, width = 0.05 },
+        key(merge(S.slash, key { click = "/", label_symbol = { { text = "ic@lightning-bolt" } }, width = 0.06 })),
         key(merge(S.a, key { click = "a", label_symbol = { { text = { " ", "?" }, align = "justify" } }, swipe_up = "?", popup = { "A", "?", "¿" } })),
         key(merge(S.s, key { click = "s", label_symbol = { { text = { " ", "×" }, align = "justify" } }, swipe_up = "×", popup = { "S" } })),
         key(merge(S.d, key { click = "d", label_symbol = { { text = { " ", "÷" }, align = "justify" } }, swipe_up = "÷", popup = { "D" } })),
         key(merge(S.f, key { click = "f", label_symbol = { { text = { " ", "{" }, align = "justify" } }, swipe_up = "{", popup = { "F" } })),
         key(merge(S.g, key { click = "g", label_symbol = { { text = { " ", "ic@apps" }, align = "justify" } }, popup = { "G", "WindowMenu" }, swipe_down = "KeyboardEditor" })),
         key(merge(S.h, key { click = "h", label_symbol = { { text = { " ", "}" }, align = "justify" } }, swipe_up = "}", popup = { "H" } })),
-        key(merge(S.j, key { click = "j", label_symbol = { { text = { " ", "~" }, align = "justify" } }, swipe_up = "~", popup = { "J" } })),
-        key(merge(S.k, key { click = "k", label_symbol = { { text = { " ", "|" }, align = "justify" } }, swipe_up = "|", popup = { "K" } })),
-        key(merge(S.l, key { click = "l", label_symbol = { { text = { " ", ";" }, align = "justify" } }, swipe_up = ";", popup = { "L", "·", "§" } })),
-        key { spacer = true, width = 0.05 }
+        key(merge(S.j, key { click = "j", label_symbol = { { text = { " ", "|" }, align = "justify" } }, swipe_up = "|", popup = { "J" } })),
+        key(merge(S.k, key { click = "k", label_symbol = { { text = { " ", ":" }, align = "justify" } }, swipe_up = ":", popup = { "K", "·", "§" } })),
+        key(merge(S.l, key { click = "l", label_symbol = { { text = { " ", "'" }, align = "justify" } }, swipe_up = "'", popup = { "L" } })),
+        key(merge(S.semicolon, key { click = ";", label_symbol = { { text = "ic@numeric-2-box-outline" } }, width = 0.06 }))
       }
     },
     row {
       keys = {
-        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.15 })),
+        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.157 })),
         key(merge(S.z, key { click = "z", label_symbol = { { text = { " ", "ic@select-all" }, align = "justify" } }, popup = { "Z", "SelectAll" } })),
         key(merge(S.x, key { click = "x", label_symbol = { { text = { " ", "ic@content-cut" }, align = "justify" } }, popup = { "X", "Cut" } })),
         key(merge(S.c, key { click = "c", label_symbol = { { text = { " ", "ic@content-copy" }, align = "justify" } }, popup = { "C", "Copy" } })),
@@ -50,7 +50,7 @@ local keyboard = keyboard {
         key(merge(S.b, key { click = "b", label_symbol = { { text = { " ", "ic@ideogram-cjk" }, align = "justify" } }, popup = { "B", "ZiTools" } })),
         key(merge(S.n, key { click = "n", label_symbol = { { text = { " ", "ic@page-first" }, align = "justify" } }, popup = { "N", "Page_Up" } })),
         key(merge(S.m, key { click = "m", label_symbol = { { text = { " ", "ic@page-last" }, align = "justify" } }, popup = { "M", "Page_Down" } })),
-        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.15 }))
+        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.157 }))
       }
     },
     action_rows.action,

@@ -1,5 +1,5 @@
-local keyboard = keyboard(merge(safe_require("nekocat.layouts.38keys"), keyboard {
-  name = "万象·李氏三拼",
+local keyboard = keyboard(merge(safe_require("nekocat.layouts.38keys3x5b1"), keyboard {
+  name = "万象·李氏三拼3x5b1",
   rows = {
     [1] = row {
       keys = {
@@ -21,8 +21,8 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.38keys"), keyboard
     },
     [3] = {
       keys = {
-        [2] = key { hint = { { text = "i ia iang", color = "blue" } } },
-        [3] = key { hint = { { text = "iai i iao", color = "blue" } } },
+        [2] = key { hint = { { text = "ia ian iang", color = "blue" } } },
+        [3] = key { hint = { { text = "i iai iao", color = "blue" } } },
         [4] = key { hint = { { text = "io iu iong", color = "blue" } } },
         [5] = key { hint = { { text = "ie in ing", color = "blue" } } },
         [6] = key { hint = { { text = "ü", color = "blue" } } }

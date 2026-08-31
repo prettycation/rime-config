@@ -1,6 +1,6 @@
 local hint_offset = safe_require("nekocat.font_offset").auxhint
 
-local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard {
+local keyboard = keyboard(merge(safe_require("nekocat.layouts.47keys"), keyboard {
   name = "万象小鹤",
   label_transform = "UPPERCASE",
   rows = {
@@ -25,17 +25,17 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "亻", "人", "冉\n" }, color = "overlay2", align = "justify" },
           { text = { "入", "壬", "刃\n" }, color = "overlay2", align = "justify" },
-          { text = "uan", color = "blue" }
+          { text = "[uü]an", color = "blue" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "田", "土\n" }, color = "overlay2", align = "justify" },
           { text = { "天", "太", "屯\n" }, color = "overlay2", align = "justify" },
-          { text = "ue üe", color = "blue" }
+          { text = "[uü]e", color = "blue" }
         } })),
         [6] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
-          { text = { "讠", "𧘇", "⺷\n" }, color = "overlay2", align = "justify" },
+          { text = { "𧘇", "讠", "⺷\n" }, color = "overlay2", align = "justify" },
           { text = { "⺶", "羊", "玉\n" }, color = "overlay2", align = "justify" },
-          { text = "un", color = "blue" }
+          { text = "[uü]n", color = "blue" }
         } })),
         [7] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "饣", "龵", "𠂇\n" }, color = "overlay2", align = "justify" },
@@ -50,7 +50,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [9] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = "日\n", color = "teal" },
           { text = { "月", "目\n" }, color = "overlay2", align = "justify" },
-          { text = { "zy", "o", "uo" }, color = { "red", "blue", "blue" }, bold = { true, false, false }, align = "justify" }
+          { text = { "zy", "u?o" }, color = { "red", "blue" }, bold = { true, false, false }, align = "justify" }
         } })),
         [10] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丿", "礻", "衤\n" }, color = { "lavender", "rosewater", "rosewater" }, align = "justify" },
@@ -69,12 +69,12 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "纟", "厶", "龴\n" }, color = "overlay2", align = "justify" },
           { text = { "罒", "巳", "肃\n" }, color = "overlay2", align = "justify" },
-          { text = "(i)ong", color = "blue" }
+          { text = { "xi", " i?ong" }, color = { "red", "blue" } }
         } })),
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丶", "冫", "氵\n" }, color = { "lavender", "overlay2", "overlay2" }, align = "justify" },
           { text = { "⺈", "刂", "刁\n" }, color = "overlay2", align = "justify" },
-          { text = "ai", color = "blue" }
+          { text = "i?ai", color = "blue" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "\u{F804}", "\u{F805}", "龶\n" }, color = "overlay2", align = "justify" },
@@ -92,7 +92,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
           { text = "ang", color = "blue" }
         } })),
         [8] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
-          { text = { "钅", "龹", "金\n" }, color = "overlay2", align = "justify" },
+          { text = { "龹", "钅", "金\n" }, color = "overlay2", align = "justify" },
           { text = { "臼", "夹", "柬\n" }, color = "overlay2", align = "justify" },
           { text = "an", color = "blue" }
         } })),
@@ -104,7 +104,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [10] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丨", "耂", "立\n" }, color = { "lavender", "overlay2", "overlay2" }, align = "justify" },
           { text = { "龙", "来", "丽\n" }, color = "overlay2", align = "justify" },
-          { text = "i|uang", color = "blue" }
+          { text = "[iu]ang", color = "blue" }
         } }))
       }
     },
@@ -113,17 +113,17 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.45keys"), keyboard
         [2] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "廴", "辶", "⻊\n" }, color = { "teal", "teal", "overlay2" }, align = "justify" },
           { text = { "再", "自", "子\n" }, color = "overlay2", align = "justify" },
-          { text = "ou", color = "blue" }
+          { text = { "ji", "ou" }, color = { "red", "blue" }, align = "justify" }
         } })),
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "乂", "忄", "⺍\n" }, color = { "rosewater", "overlay2", "overlay2" }, align = "justify" },
           { text = { "⺌", "⺗", "小\n" }, color = "overlay2", align = "justify" },
-          { text = "ia ua", color = "blue" }
+          { text = "[iu]a", color = "blue" }
         } })),
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "艹", "廾", "寸\n" }, color = "overlay2", align = "justify" },
           { text = { "才", "匆", "册\n" }, color = "overlay2", align = "justify" },
-          { text = "ao", color = "blue" }
+          { text = { "qi", "ao" }, color = { "red", "blue" }, align = "justify" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "𪛙", "⺮", "豸\n" }, color = { "lavender", "overlay2", "overlay2" }, align = "justify" },
