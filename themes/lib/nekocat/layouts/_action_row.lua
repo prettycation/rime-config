@@ -11,18 +11,16 @@ local extra_style = key {
   key_border_color = "0x00"
 }
 
----@param opts { mode_switch: boolean?, has_menu: boolean? }
+---@param opts { mode_switch: boolean? }
 ---@return { action: KeyboardRow, extra: KeyboardRow }
 return function(opts)
-  local has_menu = opts.has_menu and "Tab" or nil
-
   local action = row {
     keys = {
       key(merge(S.num, key {
         click = "LiquidHistory",
         label_symbol = { { text = "ic@calculator-variant" } },
         popup = { "Calculator", "ThemeReload", "Deploy" },
-        has_menu = has_menu,
+        has_menu = "Tab",
         width = 0.157,
         key_text_size = func_key_text_size
       })),
