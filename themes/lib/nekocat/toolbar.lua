@@ -93,3 +93,5 @@ local toolbar = toolbar {
     }
   }
 }
+
+return toolbar
