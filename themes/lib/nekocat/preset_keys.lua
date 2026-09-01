@@ -26,12 +26,12 @@ local pk = {
   Left               = { label = "ic@arrow-left-bold", repeatable = true, send = "Left" },
   Right              = { label = "ic@arrow-right-bold", repeatable = true, send = "Right" },
   Up                 = { label = "ic@arrow-up-bold", repeatable = true, send = "Up" },
-  Clear              = { label = "ic@close-octagon-outline", send = "Escape" },                      -- 清空输入
-  SidebarClear       = { label = "ic@close-octagon-outline", command = "sidebar_clear" },            -- 侧边栏布局专用清空
-  DynamicClear       = { label = "ic@close-octagon-outline", command = "dynamic_clear" },            -- 动态布局专用清空
-  SlideCursor        = { slide_cursor = true },                                                      -- 软光标
-  AltLeft            = { label = "ic@arrow-left-bold-outline", repeatable = true, send = "Up" },     -- 上一个候选
-  AltRight           = { label = "ic@arrow-right-bold-outline", repeatable = true, send = "Down" },  -- 下一个候选
+  Clear              = { label = "ic@close-octagon-outline", send = "Escape" },                     -- 清空输入
+  SidebarClear       = { label = "ic@close-octagon-outline", command = "sidebar_clear" },           -- 侧边栏布局专用清空
+  DynamicClear       = { label = "ic@close-octagon-outline", command = "dynamic_clear" },           -- 动态布局专用清空
+  SlideCursor        = { slide_cursor = true },                                                     -- 软光标
+  AltLeft            = { label = "ic@arrow-left-bold-outline", repeatable = true, send = "Up" },    -- 上一个候选
+  AltRight           = { label = "ic@arrow-right-bold-outline", repeatable = true, send = "Down" }, -- 下一个候选
 
   -- App 功能
   VoiceAssist        = { label = "ic@microphone", send = "VOICE_ASSIST" },                                                                         -- 语音识别
@@ -78,17 +78,17 @@ local pk = {
   Keyboardzrm        = { label = "\u{F842}", send = "Eisu_toggle", select = "wanxiang_zrm" },            -- 自然码布局
   Keyboardzrm18keys  = { label = "\u{F844}", send = "Eisu_toggle", select = "wanxiang_zrm_18keys" },     -- 自然码 18 键
   Keyboardzrm14keys  = { label = "\u{F846}", send = "Eisu_toggle", select = "wanxiang_zrm_14keys" },     -- 自然码 14 键
-  Keyboardl17keyszrm = { label = "\u{F845}", send = "Eisu_toggle", select = "wanxiang_l17keys_zrm" },    -- 乱序 17 自然辅
+  Keyboardl17keys    = { label = "\u{F845}", send = "Eisu_toggle", select = "wanxiang_l17keys" },        -- 乱序 17
 
   -- 方案切换
-  SchemaEnglish      = { label = "\u{F840}", command = "set_schema", option = "wanxiang_english" },       -- 万象英文
-  Schemaflypy        = { label = "\u{F842}", command = "set_schema", option = "wanxiang_flypy" },         -- 万象小鹤
-  Schemaflypy18keys  = { label = "\u{F844}", command = "set_schema", option = "wanxiang_flypy_18keys" },  -- 万象小鹤 18 键
-  Schemaflypy14keys  = { label = "\u{F846}", command = "set_schema", option = "wanxiang_flypy_14keys" },  -- 万象小鹤 14 键
-  Schemal17keysflypy = { label = "\u{F845}", command = "set_schema", option = "wanxiang_l17keys_flypy" }, -- 万象乱序 17 小鹤辅
-  Schemayoemin       = { label = "\u{F847}", command = "set_schema", option = "wanxiang_yoemin" },        -- 鸢鸣万象
-  Schemalssp         = { label = "\u{F847}", command = "set_schema", option = "triple_pinyin_lssp" },     -- 李氏三拼
-  Schema9keys        = { label = "\u{F849}", command = "set_schema", option = "wanxiang_t9" },            -- 万象 9 键
+  SchemaEnglish      = { label = "\u{F840}", command = "set_schema", option = "wanxiang_english" },      -- 万象英文
+  Schemaflypy        = { label = "\u{F842}", command = "set_schema", option = "wanxiang_flypy" },        -- 万象小鹤
+  Schemaflypy18keys  = { label = "\u{F844}", command = "set_schema", option = "wanxiang_flypy_18keys" }, -- 万象小鹤 18 键
+  Schemaflypy14keys  = { label = "\u{F846}", command = "set_schema", option = "wanxiang_flypy_14keys" }, -- 万象小鹤 14 键
+  Schemal17keys      = { label = "\u{F845}", command = "set_schema", option = "wanxiang_l17keys" },      -- 万象乱序 17
+  Schemayoemin       = { label = "\u{F847}", command = "set_schema", option = "wanxiang_yoemin" },       -- 鸢鸣万象
+  Schemalssp         = { label = "\u{F847}", command = "set_schema", option = "triple_pinyin_lssp" },    -- 李氏三拼
+  Schema9keys        = { label = "\u{F849}", command = "set_schema", option = "wanxiang_t9" },           -- 万象 9 键
 
   -- 窗口切换
   WindowMenu         = { label = "ic@tune-variant", command = "menu_keyboard" },              -- 方案开关页面

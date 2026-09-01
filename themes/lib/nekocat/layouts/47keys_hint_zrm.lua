@@ -70,7 +70,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.47keys"), keyboard
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "纟", "罒", "龴\n" }, color = "rosewater", align = "justify" },
           { text = { "巳", "厶", "三\n" }, color = "overlay2", align = "justify" },
-          { text = { "xi", " i?ong" }, color = { "red", "blue" } }
+          { text = " i?ong", color = "blue" }
         } })),
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "丶", "乀", "⺈\n" }, color = { "lavender", "lavender", "rosewater" }, align = "justify" },
@@ -114,7 +114,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.47keys"), keyboard
         [2] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "⻊", "廴", "辶\n" }, color = "rosewater", align = "justify" },
           { text = { "卆", "走", "子\n" }, color = "overlay2", align = "justify" },
-          { text = { "ji", "ei" }, color = { "red", "blue" }, align = "justify" }
+          { text = "ei", color = "blue", align = "justify" }
         } })),
         [3] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "彳", "心", "忄\n" }, color = "rosewater", align = "justify" },
@@ -124,7 +124,7 @@ local keyboard = keyboard(merge(safe_require("nekocat.layouts.47keys"), keyboard
         [4] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "艹", "卄", "廾\n" }, color = { "rosewater", "overlay2", "overlay2" }, align = "justify" },
           { text = { "屮", "卝", "廿\n" }, color = "overlay2", align = "justify" },
-          { text = { "qi", "iao" }, color = { "red", "blue" }, align = "justify" }
+          { text = "iao", color = "blue", align = "justify" }
         } })),
         [5] = key(merge(hint_offset, key { label = { { align = "left", valign = "top" } }, hint = {
           { text = { "⺮", "𠂤", "爫\n" }, color = "rosewater", align = "justify" },

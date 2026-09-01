@@ -40,8 +40,8 @@ local keyboard = keyboard {
       keys = {
         key(merge(S.num, { ascii_label = { { text = "返回" } }, label = { { text = "返回" } }, click = "KeyboardDefault" })),
         key(merge(S.func, { click = "Space", label_symbol = { { text = "日期" } }, long_click = "N", key_text_size = func_key_text_size })),
-        key(merge(S.kp0, { click = "0" })),
-        key(merge(S.func, { click = ".", label_symbol = { { text = "金额" } }, long_click = "R" })),
+        key(merge(S.kp0, { click = "0", long_click = "X" })),
+        key(merge(S.func, { click = ".", label_symbol = { { text = "金额" } }, long_click = "S" })),
         key(merge(S.enter, { click = "Enter", key_text_size = func_key_text_size }))
       }
     },
