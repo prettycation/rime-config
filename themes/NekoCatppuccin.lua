@@ -105,6 +105,7 @@ local theme = theme {
       popup_size = 20,
       sidebar = font_combo,
       sidebar_size = 18,
+      liquid_tabs_size = 16,
       clipboard = font_combo,
       clipboard_size = 13,
       clipboard_category = font_combo,

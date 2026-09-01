@@ -1134,6 +1134,7 @@
 ---@field clipboard_category_size? number                # 剪贴板标签字号（默认 13）
 ---@field clipboard_size?          number                # 剪贴板字号（默认 14）
 ---@field sidebar_size?            number                # 侧栏字号（默认 -1）
+---@field liquid_tabs_size?        number                # 液态键盘导航栏字号（默认 -1，跟随 candidate_size）
 ---@field variations?              { [string]: boolean } # 字体变体特性（如 { cpct = true }）
 ---@field display?                 { [string]: string }  # Unicode 异体字显示映射
 
@@ -1329,7 +1330,7 @@
 ---@field id?               string                # 面板唯一标识符
 ---@field type?             LiquidKeyboardType    # 面板类型
 ---@field name?             string                # 面板名称（标签显示用）
----@field keys?             KeyItem[]             # 按键列表
+---@field keys?             string[]             # 按键列表
 
 --- 液态键盘。
 --- 可选——不配置时使用默认值。
