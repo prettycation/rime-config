@@ -304,7 +304,8 @@ jobs:
             "" \
             "https://github.com/yuanz-12/wanxiang_yoemin/archive/refs/heads/main.zip" \
             "yoemin/" \
-            "extract"
+            "extract" \
+            "wan.extended.dict.yaml"
 
           echo "========================================"
 
