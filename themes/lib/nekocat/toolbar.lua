@@ -1,4 +1,8 @@
-local toolbar = toolbar {
+-- ========================================================================
+-- 工具栏 (ToolBar)
+-- ========================================================================
+
+local tb = toolbar {
   button_font = { "LXGW975YuanSC-400W.ttf" },
   back_style = "ic@chevron-triple-left",
   primary_button = {
@@ -94,4 +98,4 @@ local toolbar = toolbar {
   }
 }
 
-return toolbar
+return tb

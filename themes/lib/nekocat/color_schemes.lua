@@ -1,4 +1,9 @@
-local pcs = {
+-- ========================================================================
+-- 配色方案 (ColorScheme)
+-- 使用 Catppuccin 调色板：Latte (亮色) + Mocha (暗色)
+-- ========================================================================
+
+local cs = {
   scheme("default", safe_require("nekocat.colors.swx_hbhh").e5),
   scheme("default_dark", safe_require("nekocat.colors.swx_hbhh").e6),
   scheme("e1", safe_require("nekocat.colors.swx_colors").e1),
@@ -14,4 +19,4 @@ local pcs = {
   scheme("s4", safe_require("nekocat.colors.swx_zjsh").s4)
 }
 
-return pcs
+return cs

@@ -6,11 +6,14 @@ local theme = theme {
   -- ========================================================================
   -- 元数据
   -- ========================================================================
-  name = "NekoCatppuccin",
+  name = "NekoCatppuccinPad",
   version = "5.6",
   author = "Carlson24(鹤衔春雪)",
 
-  style = safe_require("nekocat.generalstyle"),
+  style = merge(safe_require("nekocat.generalstyle"), style {
+    keyboard_height = 285,  -- [int] 竖屏键盘高度 (px)
+    candidate_view_height = 40 -- [int] 候选区高度
+  }),
 
   fallback_colors = safe_require("nekocat.colors._key_colors").fallback_colors,
 

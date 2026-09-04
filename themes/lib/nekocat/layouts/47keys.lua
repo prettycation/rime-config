@@ -27,7 +27,7 @@ local keyboard = keyboard {
     },
     row {
       keys = {
-        key(merge(S.slash, key { click = "/", label_symbol = { { text = "ic@lightning-bolt" } }, width = 0.06 })),
+        key { spacer = true, width = 0.05 },
         key(merge(S.a, key { click = "a", label_symbol = { { text = { " ", "?" }, align = "justify" } }, swipe_up = "?", popup = { "A", "?", "¿" } })),
         key(merge(S.s, key { click = "s", label_symbol = { { text = { " ", "×" }, align = "justify" } }, swipe_up = "×", popup = { "S" } })),
         key(merge(S.d, key { click = "d", label_symbol = { { text = { " ", "÷" }, align = "justify" } }, swipe_up = "÷", popup = { "D" } })),
@@ -36,21 +36,21 @@ local keyboard = keyboard {
         key(merge(S.h, key { click = "h", label_symbol = { { text = { " ", "}" }, align = "justify" } }, swipe_up = "}", popup = { "H" } })),
         key(merge(S.j, key { click = "j", label_symbol = { { text = { " ", "|" }, align = "justify" } }, swipe_up = "|", popup = { "J" } })),
         key(merge(S.k, key { click = "k", label_symbol = { { text = { " ", ":" }, align = "justify" } }, swipe_up = ":", popup = { "K", "·", "§" } })),
-        key(merge(S.l, key { click = "l", label_symbol = { { text = { " ", "'" }, align = "justify" } }, swipe_up = "'", popup = { "L" } })),
-        key(merge(S.semicolon, key { click = ";", label_symbol = { { text = "ic@numeric-2-box-outline" } }, width = 0.06 }))
+        key(merge(S.l, key { click = "l", label_symbol = { { text = { " ", ";" }, align = "justify" } }, swipe_up = ";", popup = { "L" } })),
+        key { spacer = true, width = 0.05 }
       }
     },
     row {
       keys = {
-        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.157 })),
-        key(merge(S.z, key { click = "z", label_symbol = { { text = { " ", "ic@select-all" }, align = "justify" } }, popup = { "Z", "SelectAll" } })),
-        key(merge(S.x, key { click = "x", label_symbol = { { text = { " ", "ic@content-cut" }, align = "justify" } }, popup = { "X", "Cut" } })),
-        key(merge(S.c, key { click = "c", label_symbol = { { text = { " ", "ic@content-copy" }, align = "justify" } }, popup = { "C", "Copy" } })),
-        key(merge(S.v, key { click = "v", label_symbol = { { text = { " ", "ic@content-paste" }, align = "justify" } }, popup = { "V", "Paste" }, swipe_down = "WindowClipboard" })),
-        key(merge(S.b, key { click = "b", label_symbol = { { text = { " ", "ic@ideogram-cjk" }, align = "justify" } }, popup = { "B", "ZiTools" } })),
-        key(merge(S.n, key { click = "n", label_symbol = { { text = { " ", "ic@page-first" }, align = "justify" } }, popup = { "N", "Page_Up" } })),
-        key(merge(S.m, key { click = "m", label_symbol = { { text = { " ", "ic@page-last" }, align = "justify" } }, popup = { "M", "Page_Down" } })),
-        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.157 }))
+        key(merge(S.shift, key { click = "Shift", double_click = "CapsLock", label_symbol = { { text = "ic@keyboard-caps" } }, key_text_size = func_key_text_size, width = 0.15 })),
+        key(merge(S.z, key { click = "z", label_symbol = { { text = { " ", "ic@select-all" }, align = "justify" } }, popup = { "SelectAll", "Z" } })),
+        key(merge(S.x, key { click = "x", label_symbol = { { text = { " ", "ic@content-cut" }, align = "justify" } }, popup = { "Cut", "X" } })),
+        key(merge(S.c, key { click = "c", label_symbol = { { text = { " ", "ic@content-copy" }, align = "justify" } }, popup = { "Copy", "C" } })),
+        key(merge(S.v, key { click = "v", label_symbol = { { text = { " ", "ic@content-paste" }, align = "justify" } }, popup = { "Paste", "V" }, swipe_down = "WindowClipboard" })),
+        key(merge(S.b, key { click = "b", label_symbol = { { text = { " ", "ic@ideogram-cjk" }, align = "justify" } }, popup = { "ZiTools", "B" } })),
+        key(merge(S.n, key { click = "n", label_symbol = { { text = { " ", "ic@page-first" }, align = "justify" } }, popup = { "Page_Up", "N" } })),
+        key(merge(S.m, key { click = "m", label_symbol = { { text = { " ", "ic@page-last" }, align = "justify" } }, popup = { "Page_Down", "M" } })),
+        key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size, width = 0.15 }))
       }
     },
     action_rows.action,
