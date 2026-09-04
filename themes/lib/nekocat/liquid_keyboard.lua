@@ -1,5 +1,9 @@
+-- ========================================================================
+-- 液态键盘 (LiquidKeyboard)
+-- ========================================================================
+
 ---@type LiquidKeyboard
-local liquid = liquid {
+local lk = liquid {
   columns = 6,
   row = 5,
   bottom_padding = 20,
@@ -635,4 +639,4 @@ local liquid = liquid {
   }
 }
 
-return liquid
+return lk

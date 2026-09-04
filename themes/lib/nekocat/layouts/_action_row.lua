@@ -17,20 +17,22 @@ return function(opts)
   local action = row {
     keys = {
       key(merge(S.num, key {
-        click = "LiquidHistory",
+        click = "KeyboardNumber",
         label_symbol = { { text = "ic@calculator-variant" } },
-        popup = { "Calculator", "ThemeReload", "Deploy" },
+        popup = { "Calculator", "LiquidHistory", "LiquidEmoji", "ThemeReload", "Deploy" },
         has_menu = "Tab",
-        width = 0.157,
+        width = 0.15,
         key_text_size = func_key_text_size
       })),
       key(merge(S.switch, key {
-        click = "KeyboardNumber",
-        long_click = "ColorList",
-        hint = { { text = "ic@list-box-outline" } },
-        swipe_down = "SchemeList",
+        click = opts.mode_switch and "ModeSwitch" or "Keyboard45Eng",
+        label_symbol = { { text = "ic@keyboard-settings-outline" } },
+        long_click = "KeyboardList",
+        hint = { { text = "ic@web" } },
+        swipe_down = "IMESwitch",
+        has_menu = "Escape",
         width = 0.11,
-        key_text_size = func_key_text_size
+        key_text_offset_y = 1
       })),
       key(merge(S.comma, key {
         label = { { text = "，" } },
@@ -57,26 +59,27 @@ return function(opts)
         click = ".",
         long_click = "]",
         swipe_up = "]",
-        hint = { { text = "ic@lightbulb-outline" } },
-        swipe_down = "HintSwitch",
+        hint = { { text = "ic@list-box-outline" } },
+        swipe_down = "SchemeList",
         width = 0.1,
         key_text_size = func_key_text_size,
         key_text_offset_y = -1
       })),
       key(merge(S.switch, key {
-        click = opts.mode_switch and "ModeSwitch" or "Keyboard45Eng",
-        label_symbol = { { text = "ic@keyboard-settings-outline" } },
-        long_click = "KeyboardList",
-        hint = { { text = "ic@web" } },
-        swipe_down = "IMESwitch",
-        width = 0.11,
-        key_text_size = func_key_text_size,
-        key_text_offset_y = 2
+        click = "/",
+        label_symbol = { { text = "'", scale = 1.5 } },
+        long_click = "'",
+        swipe_up = "'",
+        hint = { { text = "ic@lightbulb-outline" } },
+        swipe_down = "HintSwitch",
+        has_menu = "Semicolon",
+        width = 0.11
       })),
       key(merge(S.enter, key {
         label = { { text = "enter_labels" } },
         click = "Enter",
-        width = 0.157,
+        long_click = "ColorList",
+        width = 0.15,
         key_text_size = func_key_text_size
       }))
     }

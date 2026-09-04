@@ -1,11 +1,15 @@
----@type { [string]: PresetKey }
-
 local function calc_func(name, label)
   local lbl = label or name
   if #lbl < 5 then lbl = lbl .. string.rep(" ", 5 - #lbl) end
   return { popup_label = lbl, text = name .. "(){Left}" }
 end
 
+-- ========================================================================
+-- 预设按键 (PresetKey)
+-- 按键行为定义，键盘布局中引用键名
+-- ========================================================================
+
+---@type { [string]: PresetKey }
 local pk = {
   -- 功能键
   Escape             = { label = "ic@keyboard-esc", send = "Escape" },
@@ -121,128 +125,55 @@ local pk = {
   SelectToneThree    = { label = "\u{F823}", send = "8" }, -- 音调三声
   SelectToneFour     = { label = "\u{F824}", send = "9" }, -- 音调四声
   SelectToneNull     = { label = "\u{F825}", send = "0" }, -- 音调无声
-
+  Semicolon          = { label = "ic@numeric-2-box-outline", send = ";" }, -- 分号用于次选
 
   -- 计算器函数
 
   -- ==== ASCII 处理 ====
-  Slash         = { label = "/", commit = "/" }, -- 除号
-  Period        = { label = ".", commit = "." }, -- 句号
-  Colon         = { label = ":", commit = ":" }, -- 冒号
-  ParenCommit   = { commit = "()" }, -- 括号
-  Paren         = { label = "( )", actions = { "ParenCommit", "Left" } }, -- 括号
-  BracketCommit = { commit = "[]" }, -- 中括号
-  Bracket       = { label = "[ ]", actions = { "BracketCommit", "Left" } }, -- 中括号
-  Formula       = { label = "算式", actions = { "End", "space" } }, -- 输出算式
+  Slash              = { label = "/", commit = "/" }, -- 除号
+  Period             = { label = ".", commit = "." }, -- 句号
+  Colon              = { label = ":", commit = ":" }, -- 冒号
+  ParenCommit        = { commit = "()" }, -- 括号
+  Paren              = { label = "( )", actions = { "ParenCommit", "Left" } }, -- 括号
+  BracketCommit      = { commit = "[]" }, -- 中括号
+  Bracket            = { label = "[ ]", actions = { "BracketCommit", "Left" } }, -- 中括号
+  Formula            = { label = "算式", actions = { "End", "space" } }, -- 输出算式
 
   -- ==== 基础数学 ====
-  Sin           = calc_func("sin"),   -- 正弦
-  Cos           = calc_func("cos"),   -- 余弦
-  Tan           = calc_func("tan"),   -- 正切
-  Asin          = calc_func("asin"),  -- 反正弦
-  Acos          = calc_func("acos"),  -- 反余弦
-  Atan          = calc_func("atan"),  -- 反正切
-  Atan2         = calc_func("atan2"), -- 点(x,y)角度
-  Sinh          = calc_func("sinh"),  -- 双曲正弦
-  Cosh          = calc_func("cosh"),  -- 双曲余弦
-  Tanh          = calc_func("tanh"),  -- 双曲正切
-  Deg           = calc_func("deg"),   -- 弧度→角度
-  Rad           = calc_func("rad"),   -- 角度→弧度
-  Exp           = calc_func("exp"),   -- e^x
-  Ldexp         = calc_func("ldexp"), -- x·2^y
-  Log           = calc_func("log"),   -- 对数(底x)
-  Loge          = calc_func("loge"),  -- 自然对数
-  Logt          = calc_func("logt"),  -- 常用对数
-  Sqrt          = calc_func("sqrt"),  -- 平方根
-  Csqrt         = calc_func("csqrt"), -- 复数平方根
-  Nroot         = calc_func("nroot"), -- 开n次方
-  Ceil          = calc_func("ceil"),  -- 向上取整
-  Floor         = calc_func("floor"), -- 向下取整
-
-  -- ==== 幂方求和 ====
-  Sqsum         = calc_func("sqsum", "sqs"),   -- 自然数平方和
-  Cbsum         = calc_func("cbsum", "cbs"),   -- 自然数立方和
-  Qpsum         = calc_func("qpsum", "qps"),   -- 自然数四次方和
-  Osqsum        = calc_func("osqsum", "osqs"), -- 奇数平方和
-  Esqsum        = calc_func("esqsum", "esqs"), -- 偶数平方和
-  Ocbsum        = calc_func("ocbsum", "ocbs"), -- 奇数立方和
-  Ecbsum        = calc_func("ecbsum", "ecbs"), -- 偶数立方和
-  Oqpsum        = calc_func("oqpsum", "oqps"), -- 奇数四次方和
-  Eqpsum        = calc_func("eqpsum", "eqps"), -- 偶数四次方和
+  Sin                = calc_func("sin"),   -- 正弦
+  Cos                = calc_func("cos"),   -- 余弦
+  Tan                = calc_func("tan"),   -- 正切
+  Asin               = calc_func("asin"),  -- 反正弦
+  Acos               = calc_func("acos"),  -- 反余弦
+  Atan               = calc_func("atan"),  -- 反正切
+  Atan2              = calc_func("atan2"), -- 点(x,y)角度
+  Deg                = calc_func("deg"),   -- 弧度→角度
+  Rad                = calc_func("rad"),   -- 角度→弧度
+  Exp                = calc_func("exp"),   -- e^x
+  Ldexp              = calc_func("ldexp"), -- x·2^y
+  Log                = calc_func("log"),   -- 对数(底x)
+  Loge               = calc_func("loge"),  -- 自然对数
+  Sqrt               = calc_func("sqrt"),  -- 平方根
+  Nroot              = calc_func("nroot"), -- 开n次方
+  Ceil               = calc_func("ceil"),  -- 向上取整
+  Floor              = calc_func("floor"), -- 向下取整
 
   -- ==== 组合与数论 ====
-  Fact          = calc_func("fact"), -- 阶乘
-  Perm          = calc_func("perm"), -- 排列数
-  Comb          = calc_func("comb"), -- 组合数
-  Gcd           = calc_func("gcd"),  -- 最大公因数
-  Lcm           = calc_func("lcm"),  -- 最小公倍数
-  Mod           = calc_func("mod"),  -- 取余
+  Fact               = calc_func("fact"), -- 阶乘
+  Mod                = calc_func("mod"),  -- 取余
 
   -- ==== 数列 ====
-  Arithsum      = calc_func("arith_sum", "aris"), -- 等差数列前n项和
-  Geosum        = calc_func("geo_sum", "geos"),   -- 等比数列前n项和
-  Seq           = calc_func("seq"),               -- 数列通项公式
+  Arithsum           = calc_func("arith_sum", "aris"), -- 等差数列前n项和
+  Geosum             = calc_func("geo_sum", "geos"),   -- 等比数列前n项和
 
   -- ==== 统计 ====
-  Avg           = calc_func("avg"), -- 平均数
-  Var           = calc_func("var"), -- 方差
-
-  -- ==== 方程求解 ====
-  Eq1           = calc_func("eq1"),  -- 一元一次方程
-  Eq2           = calc_func("eq2"),  -- 二元一次方程组
-  Eq2D          = calc_func("eq2d"), -- 一元二次方程
-  Eq3           = calc_func("eq3"),  -- 一元三次方程
-  Eq4           = calc_func("eq4"),  -- 一元四次方程
-
-  -- ==== 几何 — 直线 ====
-  LinePS        = calc_func("line_ps", "lnps"), -- 点斜式求直线
-  Line2P        = calc_func("line_2p", "ln2p"), -- 两点式求直线
-  Dist          = calc_func("dist"),            -- 两点间距离
-  Pbisec        = calc_func("pbisec"),          -- 垂直平分线
-  Rotate        = calc_func("rotate", "rotat"), -- 点绕点旋转
-  Lines         = calc_func("lines"),           -- 两直线位置关系
-  Lsym          = calc_func("lsym"),            -- 直线对称
-
-  -- ==== 几何 — 点与直线 ====
-  Pld           = calc_func("pld"),  -- 点到直线距离/对称
-  Plsl          = calc_func("plsl"), -- 线关于点对称
-
-  -- ==== 几何 — 二次函数 ====
-  QuadV         = calc_func("quad_v", "qdv"),   -- 顶点式求二次函数
-  Quad3P        = calc_func("quad_3p", "qd3p"), -- 三点求二次函数
-
-  -- ==== 几何 — 圆 ====
-  CircleR       = calc_func("circle_r", "ccr"),    -- 圆心半径求圆
-  CircleC2P     = calc_func("circle_c2p", "cc2p"), -- 圆心两点求圆
-  Circle3P      = calc_func("circle_3p", "c3p"),   -- 三点求圆
-  Circles       = calc_func("circles", "circ"),    -- 两圆关系(标准)
-  CirclesG      = calc_func("circles_g", "cclg"),  -- 两圆关系(一般)
-
-  -- ==== 几何 — 三角形 ====
-  TriSSS        = calc_func("tri_sss", "tsss"),    -- 三边求面积
-  TriArea       = calc_func("tri_area", "trar"),   -- 顶点求面积
-  TriCenter     = calc_func("tri_center", "tcen"), -- 四心坐标
-  TriCR         = calc_func("tri_cr", "tcr"),      -- 内外半径(边长)
-  TriCRP        = calc_func("tri_crp", "tcrp"),    -- 内外半径(顶点)
-
-  -- ==== 几何 — 正多边形 ====
-  Poly          = calc_func("poly"), -- 正n边形面积
-
-  -- ==== 行列式 ====
-  Det           = calc_func("det"), -- 行列式
-
-  -- ==== 随机数 ====
-  Rand          = calc_func("rand"),  -- 随机数
-  RandN         = calc_func("randn"), -- 批量随机数
-
-  -- ==== 数论 ====
-  Pytha         = calc_func("pytha"),  -- 勾股数
-  Pfact         = calc_func("pfact"),  -- 质因数分解
-  Primes        = calc_func("primes"), -- 找质数
+  Avg                = calc_func("avg"), -- 平均数
+  Var                = calc_func("var"), -- 方差
 
   -- ==== 工具 ====
-  Base          = calc_func("base"), -- 进制转换
-  Unit          = calc_func("unit")  -- 单位换算
+  Rand               = calc_func("rand"), -- 随机数
+  Base               = calc_func("base"), -- 进制转换
+  Unit               = calc_func("unit")  -- 单位换算
 }
 
 return pk
