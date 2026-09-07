@@ -475,7 +475,7 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=format:"%s")
           TAG_NAME="nightly"
           RELEASE_NAME="Nightly Build ${RELEASE_DATE}"
-          RELEASE_ZIP="LyraIME-nightly-${RELEASE_DATE}.zip"
+          RELEASE_ZIP="LyraIME-nightly.zip"
           VERSIONS_FILE=".github/sync/sha/versions.json"
 
           echo "日期:   ${RELEASE_DATE}"
