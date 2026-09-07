@@ -2,6 +2,20 @@
 -- 工具栏 (ToolBar)
 -- ========================================================================
 
+local function fg(style)
+  local f = { font_size = 18, padding = 2, normal = "text_color" }
+  if type(style) == "table" then
+    f.option_styles = style
+  else
+    f.style = style
+  end
+  return f
+end
+
+local function make_button(action, style)
+  return { action = action, foreground = fg(style) }
+end
+
 local tb = toolbar {
   button_font = { "LXGW975YuanSC-400W.ttf" },
   back_style = "ic@chevron-triple-left",
@@ -15,86 +29,17 @@ local tb = toolbar {
       vertical_inset = 4,
       horizontal_inset = 0
     },
-    foreground = {
-      font_size = 18,
-      padding = 2,
-      normal = "text_color",
-      style = "ic@cogs"
-    }
+    foreground = fg("ic@cogs")
   },
   buttons = {
-    {
-      action = "HideKeyboard",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@keyboard-close"
-      }
-    },
-    {
-      action = "VoiceSwitch",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        option_styles = { "ic@microphone", "ic@stop-circle" }
-      }
-    },
-    {
-      action = "WindowClipboard",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@clipboard-list-outline"
-      }
-    },
-    {
-      action = "Redo",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@rotate-right"
-      }
-    },
-    {
-      action = "KeyboardEditor",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@cursor-move"
-      }
-    },
-    {
-      action = "Undo",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@rotate-left"
-      }
-    },
-    {
-      action = "FloatingSwitch",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        option_styles = { "ic@dock-window", "ic@keyboard-outline" }
-      }
-    },
-    {
-      action = "OneHandSwitch",
-      foreground = {
-        font_size = 18,
-        padding = 2,
-        normal = "text_color",
-        style = "ic@keyboard-variant"
-      }
-    }
+    make_button("HideKeyboard", "ic@keyboard-close"),
+    make_button("VoiceSwitch", { "ic@microphone", "ic@stop-circle" }),
+    make_button("WindowClipboard", "ic@clipboard-list-outline"),
+    make_button("Redo", "ic@rotate-right"),
+    make_button("KeyboardEditor", "ic@cursor-move"),
+    make_button("Undo", "ic@rotate-left"),
+    make_button("FloatingSwitch", { "ic@dock-window", "ic@keyboard-outline" }),
+    make_button("OneHandSwitch", "ic@keyboard-variant")
   }
 }
 

@@ -68,7 +68,7 @@ return function(opts)
       key(merge(S.switch, key {
         click = "/",
         label_symbol = { { text = "'", scale = 1.5 } },
-        long_click = "'",
+        long_click = "/",
         swipe_up = "'",
         hint = { { text = "ic@lightbulb-outline" } },
         swipe_down = "HintSwitch",
@@ -86,13 +86,13 @@ return function(opts)
   }
 
   local extra = row {
-    height = 0.085,
+    height = 0.09,
     keys = {
-      key(merge(extra_style, { label = { { text = "ic@web" } }, click = "IMESwitch", width = 0.17 })),
+      key(merge(extra_style, { click = "IMESwitch", width = 0.17 })),
       key(merge(extra_style, { click = "AltLeft", width = 0.1 })),
       key(merge(extra_style, { click = "SlideCursor" })),
       key(merge(extra_style, { click = "AltRight", width = 0.1 })),
-      key(merge(extra_style, { label = { { text = "ic@clipboard-text-outline" } }, click = "WindowClipboard", width = 0.17 }))
+      key(merge(extra_style, { click = "WindowClipboard", width = 0.17 }))
     }
   }
 

@@ -1,6 +1,6 @@
 local font_combo = {
   "LXGW975YuanSC-400W.ttf", "OpenMoji.ttf", "CarlsonFont.ttf",
-  "SourceHanSans.otf", "PlangothicP1.otf", "PlangothicP2.otf"
+  "WenJinMinchoP0-Regular.otf", "WenJinMinchoP2-Regular.otf", "WenJinMinchoP3-Regular.otf"
 }
 
 -- ========================================================================
@@ -9,8 +9,6 @@ local font_combo = {
 -- ========================================================================
 local gs = style {
   -- 键盘
-  keyboard_height = 265,                      -- [int] 竖屏键盘高度 (px)
-  keyboard_height_land = 150,                 -- [int] 横屏键盘高度 (px)
   horizontal_gap = 2,                         -- [int] 键水平间距 (px)
   vertical_gap = 1,                           -- [int] 键盘行距 (px)
   round_corner = 10,                          -- [float] 按键圆角半径
