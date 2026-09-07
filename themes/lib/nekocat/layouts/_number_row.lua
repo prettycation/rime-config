@@ -4,24 +4,35 @@
 
 ---@type KeyColorStyles
 local S = safe_require("nekocat.colors._key_colors")
-local offset = safe_require("nekocat.font_offset").num_key_symbol_offset_y
+local symoffset = safe_require("nekocat.font_offset").num_key_symbol_offset_y
+local textoffset = safe_require("nekocat.font_offset").num_key_text_offset_y
+
+local NUMS = {
+  { "1", "!", "①" }, { "2", "@", "②" }, { "3", "#", "③" }, { "4", "$", "④" }, { "5", "%", "⑤" },
+  { "6", "^", "⑥" }, { "7", "&", "⑦" }, { "8", "*", "⑧" }, { "9", "(", "⑨" }, { "0", ")", "⓪" }
+}
+
+local function num_key(digit, symbol, down)
+  return key(merge(S["num" .. digit], key {
+    click = digit,
+    label_symbol = { { text = { "ic@numeric-" .. digit .. "-circle-outline", symbol }, align = { "left", "right" } } },
+    long_click = symbol,
+    swipe_up = symbol,
+    swipe_down = down,
+    key_text_offset_y = textoffset,
+    key_symbol_offset_y = symoffset
+  }))
+end
 
 return {
   number_row = function()
+    local keys = {}
+    for i, n in ipairs(NUMS) do
+      keys[i] = num_key(n[1], n[2], n[3])
+    end
     return row {
-      height = 0.11,
-      keys = {
-        key(merge(S.num1, key { click = "1", label_symbol = { { text = { "1", "!" }, align = { "left", "right" } } }, swipe_up = "!", key_symbol_offset_y = offset })),
-        key(merge(S.num2, key { click = "2", label_symbol = { { text = { "2", "@" }, align = { "left", "right" } } }, swipe_up = "@", key_symbol_offset_y = offset })),
-        key(merge(S.num3, key { click = "3", label_symbol = { { text = { "3", "#" }, align = { "left", "right" } } }, swipe_up = "#", key_symbol_offset_y = offset })),
-        key(merge(S.num4, key { click = "4", label_symbol = { { text = { "4", "$" }, align = { "left", "right" } } }, swipe_up = "$", key_symbol_offset_y = offset })),
-        key(merge(S.num5, key { click = "5", label_symbol = { { text = { "5", "%" }, align = { "left", "right" } } }, swipe_up = "%", key_symbol_offset_y = offset })),
-        key(merge(S.num6, key { click = "6", label_symbol = { { text = { "6", "^" }, align = { "left", "right" } } }, swipe_up = "^", key_symbol_offset_y = offset })),
-        key(merge(S.num7, key { click = "7", label_symbol = { { text = { "7", "&" }, align = { "left", "right" } } }, swipe_up = "&", key_symbol_offset_y = offset })),
-        key(merge(S.num8, key { click = "8", label_symbol = { { text = { "8", "*" }, align = { "left", "right" } } }, swipe_up = "*", key_symbol_offset_y = offset })),
-        key(merge(S.num9, key { click = "9", label_symbol = { { text = { "9", "(" }, align = { "left", "right" } } }, swipe_up = "(", key_symbol_offset_y = offset })),
-        key(merge(S.num0, key { click = "0", label_symbol = { { text = { "0", ")" }, align = { "left", "right" } } }, swipe_up = ")", key_symbol_offset_y = offset }))
-      }
+      height = 0.13,
+      keys = keys
     }
   end,
 

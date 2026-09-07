@@ -22,8 +22,7 @@ local ct = {
   popup_text_color = "text_color",           -- [string] 长按菜单字体颜色
   popup_background_color = "back_color",     -- [string] 长按菜单背景颜色
   popup = {
-    { action = "CandPin", label = "置顶" },
-    { action = "CandDelete", label = "删除" }
+    { action = "CandPin", label = "置顶" }
   },
   popup_by_type = {
     pinned = {
@@ -32,6 +31,13 @@ local ct = {
         { action = "CandPin", label = "取消置顶" },
         { action = "CandUp", label = "前移该词" },
         { action = "CandDown", label = "后移该词" },
+        { action = "CandDelete", label = "删除该词" }
+      }
+    },
+    user_phrase = {
+      popup_width = 100,
+      popup = {
+        { action = "CandPin", label = "置顶该词" },
         { action = "CandDelete", label = "删除该词" }
       }
     }

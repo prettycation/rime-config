@@ -10,7 +10,10 @@ local theme = theme {
   version = "5.6",
   author = "Carlson24(鹤衔春雪)",
 
-  style = safe_require("nekocat.generalstyle"),
+  style = merge(safe_require("nekocat.generalstyle"), style {
+    keyboard_height = 270,     -- [int] 竖屏键盘高度 (px)
+    keyboard_height_land = 150 -- [int] 横屏键盘高度 (px)
+  }),
 
   fallback_colors = safe_require("nekocat.colors._key_colors").fallback_colors,
 
