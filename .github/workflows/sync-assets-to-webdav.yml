@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 2 * * *" # 每天UTC时间2点自动运行
   workflow_dispatch: # 支持手动触发
+    inputs:
+      force_nightly:
+        description: "发布 Nightly Release"
+        type: boolean
+        default: true
   push:
     branches:
       - main # 推送到 main 时触发（正式环境）
@@ -15,7 +20,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 允许提交代码
+      contents: write # 允许提交代码和创建 Release
 
     steps:
       - name: Checkout repository
@@ -27,7 +32,7 @@ jobs:
       - name: Set up tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq jq unzip curl
+          sudo apt-get install -y -qq jq unzip curl zip
 
       - name: Install rclone
         run: |
@@ -431,3 +436,170 @@ jobs:
             echo ""
             echo "没有任何资产版本更新，跳过 Git 提交。"
           fi
+
+      # ============================================
+      # Nightly Release 自动发布
+      # ============================================
+      - name: Publish Nightly Release
+        # 在定时任务、手动触发(勾选) 或 推送到 main 分支 时执行
+        if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.force_nightly == true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+
+          echo "============================================"
+          echo "开始发布 Nightly Release"
+          echo "============================================"
+          echo ""
+
+          # ============================================
+          # 环境检查
+          # ============================================
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "当前分支: $CURRENT_BRANCH"
+
+          if [ "$CURRENT_BRANCH" != "main" ]; then
+            echo "  ⚠️ 当前分支 ($CURRENT_BRANCH) 不是 main，跳过 Nightly Release 发布"
+            exit 0
+          fi
+
+          # ============================================
+          # 准备发布信息
+          # ============================================
+          RELEASE_DATE=$(date -u +"%Y-%m-%d")
+          RELEASE_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+          TAG_NAME="nightly"
+          RELEASE_NAME="Nightly Build ${RELEASE_DATE}"
+          RELEASE_ZIP="LyraIME-nightly-${RELEASE_DATE}.zip"
+          VERSIONS_FILE=".github/sync/sha/versions.json"
+
+          echo "日期:   ${RELEASE_DATE}"
+          echo "时间:   ${RELEASE_TIME}"
+          echo "标签:   ${TAG_NAME}"
+          echo "名称:   ${RELEASE_NAME}"
+          echo "Commit: ${SHORT_SHA}"
+          echo "包名:   ${RELEASE_ZIP}"
+          echo ""
+
+          # ============================================
+          # 打包工作区文件
+          # ============================================
+          echo "打包发布文件..."
+
+          # 确保在仓库根目录
+          cd "$GITHUB_WORKSPACE"
+
+          zip -r "$RELEASE_ZIP" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".gitignore" \
+            -x "downloads/*" \
+            -x "*.zip" \
+            -x "LyraIME-nightly-*.zip" \
+            -x "*.sha256" \
+            > /dev/null
+
+          ZIP_SIZE=$(du -h "$RELEASE_ZIP" | cut -f1)
+          ZIP_SHA256=$(sha256sum "$RELEASE_ZIP" | cut -d' ' -f1)
+          echo "包大小:   ${ZIP_SIZE}"
+          echo "SHA256:  ${ZIP_SHA256}"
+          echo ""
+
+          # 生成校验和文件
+          echo "${ZIP_SHA256}  ${RELEASE_ZIP}" > "${RELEASE_ZIP}.sha256"
+
+          # ============================================
+          # 生成 Release Notes
+          # ============================================
+          echo "生成 Release Notes..."
+
+          NOTES_FILE=$(mktemp)
+
+          # 读取资产版本信息
+          if [ -f "$VERSIONS_FILE" ]; then
+            ASSET_VERSIONS=$(cat "$VERSIONS_FILE" | jq -r 'to_entries | map("  - \(.key): \(.value)") | join("\n")' 2>/dev/null || echo "  (无法读取版本信息)")
+          else
+            ASSET_VERSIONS="  (无版本记录文件)"
+          fi
+
+          # 统计包内文件数量
+          FILE_COUNT=$(unzip -l "$RELEASE_ZIP" | tail -n 1 | awk '{print $2}')
+
+          cat > "$NOTES_FILE" <<NOTESEOF
+          ## Nightly Build
+
+          | 项目 | 值 |
+          |------|-----|
+          | **构建日期** | ${RELEASE_DATE} |
+          | **构建时间** | ${RELEASE_TIME} (UTC) |
+          | **Commit** | \`${SHORT_SHA}\` |
+          | **Commit Message** | ${COMMIT_MSG} |
+          | **分支** | ${CURRENT_BRANCH} |
+          | **文件数量** | ${FILE_COUNT} |
+          | **包大小** | ${ZIP_SIZE} |
+
+          ### 资产版本
+
+          ${ASSET_VERSIONS}
+
+          ### 校验信息
+
+          \`\`\`
+          SHA256: ${ZIP_SHA256}
+          \`\`\`
+
+          ---
+          > ⚠️ 这是自动构建的 nightly 版本，可能包含未完成的功能或 bug。
+          > 如需稳定版本，请查看 [Releases](https://github.com/${GITHUB_REPOSITORY}/releases/latest) 页面。
+          >
+          > 此 Nightly Release 每天自动更新，指向最新构建。
+          NOTESEOF
+
+          echo "  ✅ Release Notes 已生成"
+          echo ""
+
+          # ============================================
+          # 删除旧的 Nightly Release
+          # ============================================
+          echo "清理旧的 Nightly Release..."
+
+          if gh release view "$TAG_NAME" > /dev/null 2>&1; then
+            echo "发现旧版本，正在删除..."
+            gh release delete "$TAG_NAME" --yes --cleanup-tag
+            echo "旧版本已清理"
+          else
+            echo "无旧版本需要清理"
+          fi
+          echo ""
+
+          # ============================================
+          # 创建新的 Nightly Release
+          # ============================================
+          echo "创建新的 Nightly Release..."
+
+          gh release create "$TAG_NAME" \
+            --target main \
+            --title "$RELEASE_NAME" \
+            --notes-file "$NOTES_FILE" \
+            --prerelease \
+            "$RELEASE_ZIP" \
+            "${RELEASE_ZIP}.sha256"
+
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG_NAME}"
+
+          echo ""
+          echo "============================================"
+          echo "Nightly Release 发布完成！"
+          echo "============================================"
+          echo "Release URL: ${RELEASE_URL}"
+          echo "下载文件: ${RELEASE_ZIP} (${ZIP_SIZE})"
+          echo "SHA256: ${ZIP_SHA256}"
+          echo ""
+
+          # 清理临时文件
+          rm -f "$NOTES_FILE"
