@@ -25,9 +25,9 @@ return function(opts)
         key_text_size = func_key_text_size
       })),
       key(merge(S.switch, key {
-        click = opts.mode_switch and "ModeSwitch" or "wanxiang_english",
+        click = opts.mode_switch and "ModeSwitch" or "Keyboard45Eng",
         label_symbol = { { text = "ic@keyboard-settings-outline" } },
-        long_click = "KeyboardList",
+        long_click = "SchemaEnglish",
         hint = { { text = "ic@web" } },
         swipe_down = "IMESwitch",
         has_menu = "Escape",

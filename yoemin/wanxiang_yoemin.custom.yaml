@@ -11,6 +11,11 @@ patch:
   super_comment:
     __include: shared_config.yaml:/super_comment
 
+  key_binder/bindings/+: # 追加
+    # 次选和三选
+    - { accept: semicolon, send: 2, when: has_menu } # 分号次选
+    - { accept: apostrophe, send: 3, when: has_menu } # 单引号三选
+
   # Tips 配置项
   "super_tips/disabled_types/+":
     - "化学式"
