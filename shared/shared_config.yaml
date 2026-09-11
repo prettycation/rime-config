@@ -17,21 +17,6 @@ grammar:
   rear_penalty: -18
   weak_collocation_penalty: -24
 
-user_predict:
-  enable_post_predict: true # 引擎 A：是否开启上屏后的联想预测
-  enable_context_reorder: true # 引擎 B：是否开启输入过程中的实时上下文调频
-  max_candidates: 5 # 候选栏中最多显示的联想词数量
-  max_predictions: 3 # 级联深度：允许连续自动预测的最大跳数
-  expiry_days: 90 # 物理生命周期：超 90 天未使用的 1/2-Gram 将被销毁
-  activation_days: 7 # 激活锁：新词若 7 天内不再使用，将被视为噪音冷冻
-  decay_rate: 0.85 # 遗忘衰减率：数值越小，旧词权重掉得越快
-  context_timeout: 5000 # 语境熔断 (ms)：停顿超 5 秒自动切断上下文，防远距离穿透
-  enable_predict_space: false # 键盘双模式 AB 面开关
-  db_name: "lua/predict"
-# 模式 B (默认 false，沉浸预测流)：Space 空格键交由 Rime 原生系统顺滑选词；按下 Tab、→、\ 或 Alt 等替身键时，打断联想并强制输出物理空格。
-
-# 模式 A (true，精准空格流)：Space 强制打断联想并输出物理空格；替身键仅作纯粹的打断清空。
-
 super_comment:
   candidate_length: 16 # 注释候选长度
   corrector_type: "comment" # 随意更换左右括号，比如"〔comment〕" 不加括号为无括号，comment占位不能动
