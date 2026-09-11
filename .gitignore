@@ -1,0 +1,22 @@
+# Font binaries
+*.[tT][tT][fF]
+*.[oO][tT][fF]
+*.[tT][tT][cC]
+*.[oO][tT][cC]
+*.[wW][oO][fF][fF]
+*.[wW][oO][fF][fF]2
+
+# Download cache and release archives
+/downloads/
+/LyraIME-nightly*.zip
+/LyraIME-nightly*.zip.sha256
+
+# Generated font metadata
+/themes/fonts/FONT_SOURCES.json
+/themes/fonts/FONT_NOTICES.md
+/themes/fonts/SHA256SUMS
+/themes/fonts/upstream-licenses/
+
+# Python bytecode
+__pycache__/
+*.pyc

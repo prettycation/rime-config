@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "carlsonfont",
+      "repository": "Carlson24/LyraIME",
+      "kind": "git",
+      "ref": "lyraime",
+      "files": [{"name": "CarlsonFont.ttf"}],
+      "license_label": "See LyraIME upstream notices; repository license: GPL-3.0",
+      "license_candidates": ["LICENSE", "LICENSE.txt", "COPYING"],
+      "license_marker": "GNU GENERAL PUBLIC LICENSE",
+      "attribution": "Carlson24 (\u9e64\u8854\u6625\u96ea)",
+      "note": "Includes the LyraIME repository license and available font-embedded or adjacent notices."
+    },
+    {
+      "id": "lxgw-zhenkai",
+      "repository": "lxgw/LxgwZhenKai",
+      "kind": "release",
+      "ref": "latest",
+      "asset_pattern": "LXGWZhenKaiSlabGB-Regular\\.ttf",
+      "archive": false,
+      "files": [{"name": "LXGWZhenKaiSlabGB-Regular.ttf"}],
+      "license_label": "OFL-1.1",
+      "license_candidates": ["OFL.txt", "LICENSE", "LICENSE.txt"],
+      "license_marker": "SIL OPEN FONT LICENSE",
+      "attribution": "LXGW and the upstream copyright holders"
+    },
+    {
+      "id": "source-han-sans",
+      "repository": "adobe-fonts/source-han-sans",
+      "kind": "git",
+      "ref": "release",
+      "files": [{"name": "SourceHanSansSC-Regular.otf", "path": "OTF/SimplifiedChinese/SourceHanSansSC-Regular.otf"}],
+      "license_label": "OFL-1.1",
+      "license_candidates": ["LICENSE.txt", "OFL.txt", "LICENSE"],
+      "license_marker": "SIL OPEN FONT LICENSE",
+      "attribution": "Adobe and the upstream copyright holders"
+    },
+    {
+      "id": "plangothic",
+      "repository": "Fitzgerald-Porthmouth-Koenigsegg/Plangothic_Project",
+      "kind": "release",
+      "ref": "latest",
+      "asset_pattern": "(?i).*OTF.*\\.zip",
+      "archive": true,
+      "files": [{"name": "PlangothicP1-Regular.otf"}, {"name": "PlangothicP2-Regular.otf"}],
+      "license_label": "OFL-1.1",
+      "license_candidates": ["LICENSE-OFL.txt", "OFL.txt", "LICENSE", "LICENSE.txt"],
+      "license_marker": "SIL OPEN FONT LICENSE",
+      "attribution": "Plangothic Project contributors and the upstream copyright holders"
+    },
+    {
+      "id": "openmoji",
+      "repository": "hfg-gmuend/openmoji",
+      "kind": "git",
+      "ref": "master",
+      "files": [{"name": "OpenMoji-color-colr0_svg.ttf", "path": "font/OpenMoji-color-colr0_svg/OpenMoji-color-colr0_svg.ttf"}],
+      "license_label": "CC-BY-SA-4.0",
+      "license_candidates": ["LICENSE.txt", "LICENSE", "LICENSE.md"],
+      "license_marker": "Attribution-ShareAlike 4.0",
+      "attribution": "OpenMoji (https://openmoji.org), HfG Schwaebisch Gmuend and contributors",
+      "note": "Redistributed unchanged under CC-BY-SA-4.0."
+    }
+  ]
+}

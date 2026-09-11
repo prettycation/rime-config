@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # 支持手动触发
     inputs:
       force_nightly:
-        description: "发布 Nightly Release"
+        description: "Publish Nightly Release"
         type: boolean
         default: true
   push:
@@ -16,11 +16,19 @@ on:
       - "develop/**" # 推送到 develop/* 分支时触发（测试环境）
       - "fix/**" # 推送到 fix/* 分支时触发（测试环境）
 
+# Serialize writes to the shared WebDAV destination and Nightly release.
+concurrency:
+  group: rime-assets-webdav-and-nightly
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write # 允许提交代码和创建 Release
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout repository
@@ -29,14 +37,33 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
+      - name: Reject committed font binaries
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+          import sys
+          extensions = {'.ttf', '.otf', '.ttc', '.otc', '.woff', '.woff2'}
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          tracked = [p for p in paths if pathlib.PurePosixPath(p).suffix.lower() in extensions]
+          if tracked:
+              print('::error::Tracked font binaries detected:')
+              print('\n'.join(tracked))
+              sys.exit(1)
+          PY
+
+      - name: Test font downloader
+        run: python3 -m unittest discover -s .github/scripts -p 'test_sync_fonts.py' -v
+
       - name: Set up tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq jq unzip curl zip
+          sudo apt-get install -y -qq jq unzip curl zip file
 
       - name: Install rclone
         run: |
-          curl -sL https://rclone.org/install.sh | sudo bash
+          curl -fsSL --retry 3 https://rclone.org/install.sh -o "$RUNNER_TEMP/install-rclone.sh"
+          sudo bash "$RUNNER_TEMP/install-rclone.sh"
 
       # ============================================
       # 恢复资产缓存 (只缓存原始下载文件，避免覆盖 Git 代码)
@@ -46,8 +73,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: downloads
-          key: rime-assets-${{ hashFiles('.github/sync/sha/versions.json') }}
+          key: rime-assets-fonts-v1-${{ hashFiles('.github/sync/sha/versions.json', '.github/sync/fonts.json', '.github/scripts/sync_fonts.py') }}
           restore-keys: |
+            rime-assets-fonts-v1-
             rime-assets-
 
       - name: Sync assets and push to WebDAV
@@ -61,7 +89,6 @@ jobs:
         run: |
           #!/bin/bash
           set -euo pipefail
-
           # ============================================
           # 初始化
           # ============================================
@@ -69,8 +96,7 @@ jobs:
           VERSIONS_FILE="$SHA_DIR/versions.json"
           HAS_UPDATE="false"
           UPDATED_PATHS_FILE=$(mktemp) # 用于记录所有发生更新的文件/目录路径
-
-          mkdir -p "$SHA_DIR" "downloads"
+          mkdir -p "$SHA_DIR" downloads
           if [ ! -f "$VERSIONS_FILE" ]; then
             echo '{}' > "$VERSIONS_FILE"
           fi
@@ -79,295 +105,215 @@ jobs:
           # 辅助函数
           # ============================================
 
-          # 获取最新版本哈希
-          # 参数: check_type, repo, ref, asset_name, download_url
-          get_latest_hash() {
-            local check_type=$1
-            local repo=$2
-            local ref=$3
-            local asset_name=$4
-            local download_url=$5
+          github_json() {
+            curl -fsSL --retry 3 --connect-timeout 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" "$1"
+          }
 
+          # 获取最新版本哈希
+          # 参数: check_type, repo, ref, asset_name
+          get_latest_hash() {
+            local check_type=$1 repo=$2 ref=$3 asset_name=$4
+            local api_url
             if [ "$check_type" = "commit" ]; then
-              curl -sL -H "Authorization: token $GITHUB_TOKEN" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   "https://api.github.com/repos/$repo/commits/$ref" | jq -r ".sha // empty"
+              github_json "https://api.github.com/repos/$repo/commits/$ref" \
+                | jq -er '.sha'
             elif [ "$check_type" = "release_asset" ]; then
-              local api_url=""
               if [ "$ref" = "latest" ]; then
                 api_url="https://api.github.com/repos/$repo/releases/latest"
               else
                 api_url="https://api.github.com/repos/$repo/releases/tags/$ref"
               fi
-
               # 优先获取资产的 digest (sha256)
-              local digest=$(curl -sL -H "Authorization: token $GITHUB_TOKEN" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   "$api_url" | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .digest // empty')
-
-              if [ -n "$digest" ]; then
-                echo "$digest"
-              else
-                # 回退机制：获取 ETag
-                curl -sIL -o /dev/null -w "%{etag}" "$download_url"
-              fi
+              # 回退机制：使用资产 ID、更新时间和大小
+              github_json "$api_url" | jq -er --arg name "$asset_name" '
+                [.assets[] | select(.name == $name)] |
+                if length != 1 then error("Expected exactly one matching release asset")
+                else .[0] | if (.digest // "") != "" then .digest
+                else "asset:\(.id):\(.updated_at):\(.size)" end end'
+            else
+              echo "Unsupported asset type: $check_type" >&2
+              return 1
             fi
           }
 
           process_asset() {
-            local name=$1
-            local check_type=$2
-            local repo=$3
-            local ref=$4
-            local asset_name=$5
-            local download_url=$6
-            local dest_path=$7
-            local type=$8
-            local excludes=${9:-""}
-            local sub_dir=${10:-""} # 允许指定从压缩包中只提取特定的子目录
-
-            echo "::group::检查 $name"
-
-            local latest_version=$(get_latest_hash "$check_type" "$repo" "$ref" "$asset_name" "$download_url")
-            if [ -z "$latest_version" ]; then
-              echo "⚠️ 无法获取版本信息，跳过 $name"
-              echo "::endgroup::"
-              return 1
-            fi
-
-            local last_version=$(jq -r --arg k "$name" '.[$k] // empty' "$VERSIONS_FILE")
-
-            echo "  当前版本: $last_version"
-            echo "  最新版本: $latest_version"
-
+            local name=$1 check_type=$2 repo=$3 ref=$4 asset_name=$5
+            local download_url=$6 dest_path=$7 type=$8
+            local excludes=${9:-""} sub_dir=${10:-""} # 允许指定从压缩包中只提取特定的子目录
+            local latest_version last_version cached_file extract_dir
+            local target_dir entry_count source_dir single_entry temp_json
+            echo "::group::Asset: $name"
+            latest_version=$(get_latest_hash "$check_type" "$repo" "$ref" "$asset_name")
+            last_version=$(jq -r --arg k "$name" '.[$k] // empty' "$VERSIONS_FILE")
             # 缓存文件路径 (避免文件名冲突)
-            local cached_file="downloads/${name}_$(basename "$download_url")"
-            local temp_file=""
-
-            if [ "$latest_version" = "$last_version" ] && [ "$CACHE_HIT" = "true" ] && [ -f "$cached_file" ]; then
-              echo "✅ 版本未变化，且缓存可用，跳过下载，直接使用缓存文件"
-              temp_file="$cached_file"
-            else
-              echo "版本有更新或无缓存，开始下载..."
-              mkdir -p downloads
-              curl -sL -o "$cached_file" "$download_url"
-              temp_file="$cached_file"
+            cached_file="downloads/${name}_$(basename "$download_url")"
+            # Pin branch archives to the commit just checked.
+            if [ "$check_type" = "commit" ]; then
+              download_url="https://github.com/$repo/archive/$latest_version.zip"
             fi
-
+            if [[ "$latest_version" == sha256:* ]] && [ -f "$cached_file" ]; then
+              if ! printf '%s  %s\n' "${latest_version#sha256:}" "$cached_file" | sha256sum -c - >/dev/null 2>&1; then
+                rm -f "$cached_file"
+              fi
+            fi
+            if [ "$latest_version" = "$last_version" ] && [ "$CACHE_HIT" = "true" ] && [ -s "$cached_file" ]; then
+              echo "Using cached download: $name"
+            else
+              curl -fsSL --retry 3 --connect-timeout 30 -o "$cached_file.part" "$download_url"
+              mv "$cached_file.part" "$cached_file"
+            fi
+            if [[ "$latest_version" == sha256:* ]]; then
+              printf '%s  %s\n' "${latest_version#sha256:}" "$cached_file" | sha256sum -c -
+            fi
             if [ "$type" = "extract" ]; then
-              echo "解压中..."
-              local extract_dir=$(mktemp -d)
-
-              if ! unzip -o "$temp_file" -d "$extract_dir" > /dev/null 2>&1; then
-                echo "❌ 解压失败！文件可能已损坏或不是有效的 zip 格式。"
-                file "$temp_file"
+              extract_dir=$(mktemp -d)
+              if ! unzip -o "$cached_file" -d "$extract_dir" > /dev/null; then
+                file "$cached_file"
                 rm -rf "$extract_dir"
                 exit 1
               fi
-
-              local target_dir="${dest_path%/}"
+              target_dir="${dest_path%/}"
               # 不删除原有目录，避免覆盖用户自定义文件
               mkdir -p "$target_dir"
-
               # 智能判断解压内容结构
-              local entry_count=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | wc -l)
-              local source_dir="$extract_dir"
-
+              entry_count=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | wc -l)
+              source_dir="$extract_dir"
               # 处理 GitHub 源码包常见的“外层包了一个文件夹”的情况
               if [ "$entry_count" -eq 1 ]; then
-                local single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1 | head -n 1)
+                single_entry=$(find "$extract_dir" -maxdepth 1 -mindepth 1)
                 if [ -d "$single_entry" ]; then
                   source_dir="$single_entry"
-                else
-                  if [ -z "$sub_dir" ]; then
-                    cp -a "$single_entry" "$target_dir/"
-                    source_dir="" # 标记已处理，后续跳过
-                  fi
+                elif [ -z "$sub_dir" ]; then
+                  cp -a "$single_entry" "$target_dir/"
+                  source_dir="" # 标记已处理，后续跳过
                 fi
               fi
-
               # 如果指定了要提取的子目录，并且之前没有直接处理完毕
               if [ -n "$source_dir" ]; then
                 if [ -n "$sub_dir" ]; then
-                  if [ -d "$source_dir/$sub_dir" ]; then
-                    source_dir="$source_dir/$sub_dir"
-                    echo "  🔍 锁定子目录: $sub_dir"
-                  else
-                    echo "  ⚠️ 警告: 压缩包内未找到指定的子目录 '$sub_dir'"
+                  if [ ! -d "$source_dir/$sub_dir" ]; then
+                    echo "::error::Missing archive subdirectory: $sub_dir"
+                    exit 1
                   fi
+                  source_dir="$source_dir/$sub_dir"
                 fi
                 cp -a "$source_dir"/. "$target_dir/"
               fi
-
               rm -rf "$extract_dir"
-
               # 清理不需要的文件夹
               if [ -n "$excludes" ]; then
                 IFS=',' read -ra EXCLUDE_ARRAY <<< "$excludes"
                 for excl in "${EXCLUDE_ARRAY[@]}"; do
-                  echo "🗑️ 移除不需要的项: $excl"
                   rm -rf "$target_dir/$excl"
                 done
               fi
-
-              echo "  ✅ 资产已解压到 $target_dir/"
             else
               mkdir -p "$(dirname "$dest_path")"
               # 使用 cp 而不是 mv，以保留 downloads 里的缓存文件
-              cp -f "$temp_file" "$dest_path"
-              echo "  ✅ 文件已保存到 $dest_path"
+              cp -f "$cached_file" "$dest_path"
             fi
-
             # 只有当版本变化时，才更新记录文件并收集路径
             if [ "$latest_version" != "$last_version" ]; then
-              local temp_json=$(mktemp)
+              temp_json=$(mktemp)
               jq --arg k "$name" --arg v "$latest_version" '.[$k] = $v' "$VERSIONS_FILE" > "$temp_json"
               mv "$temp_json" "$VERSIONS_FILE"
               HAS_UPDATE="true"
-
               # 记录更新的路径供后续 Rclone 强制上传使用
-              if [ "$type" = "extract" ]; then
-                echo "${dest_path%/}" >> "$UPDATED_PATHS_FILE"
-              else
-                echo "$dest_path" >> "$UPDATED_PATHS_FILE"
-              fi
-
-              echo "版本记录已更新"
+              echo "${dest_path%/}" >> "$UPDATED_PATHS_FILE"
             fi
-
             echo "::endgroup::"
-            return 0
           }
 
           # ============================================
           # 执行下载任务
           # ============================================
-          echo "开始同步资产..."
-          echo "========================================"
-
           # 1. 下载 momo 仓库 main 分支中的 dicts-pro 目录内容 -> shared/dicts/
           process_asset \
-            "momo-dicts-pro" \
-            "commit" \
-            "yuanz-12/momo" \
-            "main" \
-            "" \
+            "momo-dicts-pro" "commit" "yuanz-12/momo" "main" "" \
             "https://github.com/yuanz-12/momo/archive/refs/heads/main.zip" \
-            "shared/dicts/" \
-            "extract" \
-            "" \
-            "dicts-pro"
+            "shared/dicts/" "extract" "" "dicts-pro"
 
           # 将 zian 系列词库独立分离到 dicts_zian 目录
-          echo "分离 dicts_zian 目录..."
-
           # 创建需要的目录
           TARGET_ZIAN_DIR="shared/dicts_zian"
           mkdir -p "$TARGET_ZIAN_DIR"
-
-          if ls shared/dicts/*.zian.pro.dict.yaml 1> /dev/null 2>&1; then
-            mv shared/dicts/*.zian.pro.dict.yaml "$TARGET_ZIAN_DIR/"
-            echo "  ✅ zian 词库已成功移动到 $TARGET_ZIAN_DIR/"
-
+          shopt -s nullglob
+          zian_files=(shared/dicts/*.zian.pro.dict.yaml)
+          if [ "${#zian_files[@]}" -gt 0 ]; then
+            mv "${zian_files[@]}" "$TARGET_ZIAN_DIR/"
             # 同步更新机制：如果 shared/dicts 触发了更新，把 dicts_zian 也加入强制上传队列
-            if grep -q "shared/dicts/" "$UPDATED_PATHS_FILE" 2>/dev/null; then
+            if grep -Fxq "shared/dicts" "$UPDATED_PATHS_FILE"; then
               echo "$TARGET_ZIAN_DIR" >> "$UPDATED_PATHS_FILE"
             fi
-          else
-            echo "  ⚠️ 未能在 shared/dicts/ 中找到 zian 系列词库"
           fi
+          shopt -u nullglob
 
           # 2. wanxiang-lts-zh-hans.gram -> shared/
           process_asset \
-            "wanxiang-lts-zh-hans.gram" \
-            "release_asset" \
-            "amzxyz/RIME-LMDG" \
-            "LTS" \
+            "wanxiang-lts-zh-hans.gram" "release_asset" "amzxyz/RIME-LMDG" "LTS" \
             "wanxiang-lts-zh-hans.gram" \
             "https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram" \
-            "shared/wanxiang-lts-zh-hans.gram" \
-            "file"
-
+            "shared/wanxiang-lts-zh-hans.gram" "file"
           # 3. rime-wanxiang-moqi-fuzhu.zip -> wanxiang/ (排除 dicts, custom)
           process_asset \
-            "rime-wanxiang-moqi-fuzhu" \
-            "release_asset" \
-            "amzxyz/rime-wanxiang" \
-            "latest" \
+            "rime-wanxiang-moqi-fuzhu" "release_asset" "amzxyz/rime-wanxiang" "latest" \
             "rime-wanxiang-moqi-fuzhu.zip" \
             "https://github.com/amzxyz/rime-wanxiang/releases/latest/download/rime-wanxiang-moqi-fuzhu.zip" \
-            "wanxiang/" \
-            "extract" \
-            "dicts,custom"
-
+            "wanxiang/" "extract" "dicts,custom"
           # 4. wanxiang_yoemin 仓库 -> yoemin/
           process_asset \
-            "wanxiang_yoemin" \
-            "commit" \
-            "yuanz-12/wanxiang_yoemin" \
-            "main" \
-            "" \
+            "wanxiang_yoemin" "commit" "yuanz-12/wanxiang_yoemin" "main" "" \
             "https://github.com/yuanz-12/wanxiang_yoemin/archive/refs/heads/main.zip" \
-            "yoemin/" \
-            "extract" \
-            "wan.extended.dict.yaml"
-
-          echo "========================================"
+            "yoemin/" "extract" "wan.extended.dict.yaml"
 
           # 恢复用户仓库中的自定义文件
-          echo "🔄 恢复用户仓库中的自定义文件 (覆盖资产默认文件)..."
-
-          # 1. 备份 versions.json，防止 git restore 将其恢复为旧版
-          if [ -f "$VERSIONS_FILE" ]; then
-            cp "$VERSIONS_FILE" /tmp/versions_backup.json
-          fi
-
+          # 1. 备份 versions.json，防止 git reset 将其恢复为旧版
+          versions_backup=$(mktemp)
+          cp "$VERSIONS_FILE" "$versions_backup"
           # 2. 强制重置工作区到 HEAD，恢复所有被跟踪的用户文件
           git reset --hard HEAD
-
+          mkdir -p "$SHA_DIR"
           # 3. 将备份的最新 versions.json 恢复回去
-          if [ -f /tmp/versions_backup.json ]; then
-            cp /tmp/versions_backup.json "$VERSIONS_FILE"
+          cp "$versions_backup" "$VERSIONS_FILE"
+          rm -f "$versions_backup"
+
+          # Assemble fonts after restoring tracked configuration.
+          FONT_RESULT=$(mktemp)
+          python3 .github/scripts/sync_fonts.py \
+            --versions-file "$VERSIONS_FILE" --result "$FONT_RESULT"
+          if jq -e '.changed == true' "$FONT_RESULT" >/dev/null; then
+            HAS_UPDATE="true"
+            echo "themes/fonts" >> "$UPDATED_PATHS_FILE"
           fi
-
-          echo "✅ 用户自定义文件已恢复"
-          echo ""
-
-          echo "同步摘要: HAS_UPDATE = $HAS_UPDATE"
-          echo "触发事件: $TRIGGER_EVENT"
-          echo "缓存命中: $CACHE_HIT"
-          echo ""
+          rm -f "$FONT_RESULT"
 
           # ============================================
           # 判断是否需要执行 WebDAV 同步
           # ============================================
+          # 如果缓存没命中，说明刚才重新下载了资产填充工作区，需要同步一次以防万一
           NEED_SYNC="false"
-
-          if [ "$HAS_UPDATE" = "true" ]; then
-            echo "检测到资产有更新，需要同步到 WebDAV。"
+          if [ "$HAS_UPDATE" = "true" ] || [ "$TRIGGER_EVENT" = "push" ] || \
+             [ "$TRIGGER_EVENT" = "workflow_dispatch" ] || [ "$CACHE_HIT" != "true" ]; then
             NEED_SYNC="true"
-          elif [ "$TRIGGER_EVENT" = "push" ]; then
-            echo "检测到 Push 事件，代码可能有变更，需要同步到 WebDAV。"
-            NEED_SYNC="true"
-          elif [ "$CACHE_HIT" != "true" ]; then
-            # 如果缓存没命中，说明刚才重新下载了资产填充工作区，需要同步一次以防万一
-            echo "缓存未命中，刚重新下载了资产，需要同步到 WebDAV。"
-            NEED_SYNC="true"
-          else
-            echo "触发事件为 $TRIGGER_EVENT，资产无更新，缓存可用，无需同步到 WebDAV。"
           fi
-
           # ============================================
           # 推送到 WebDAV 并提交哈希记录
           # ============================================
           if [ "$NEED_SYNC" = "true" ]; then
-            # 1. 配置 rclone
-            echo "⚙️ 配置 rclone WebDAV 连接..."
-            mkdir -p ~/.config/rclone
-            # rclone 需要密码被 obscure 加密
-            OBSCURED_PASS=$(rclone obscure "$WEBDAV_PASSWORD")
-
-            cat > ~/.config/rclone/rclone.conf <<EOF
+            if [ -z "$WEBDAV_URL$WEBDAV_USERNAME$WEBDAV_PASSWORD" ]; then
+              echo "::notice::WebDAV secrets are not configured; building the release without WebDAV sync."
+            else
+              : "${WEBDAV_URL:?Missing WEBDAV_URL}"
+              : "${WEBDAV_USERNAME:?Missing WEBDAV_USERNAME}"
+              : "${WEBDAV_PASSWORD:?Missing WEBDAV_PASSWORD}"
+              # 1. 配置 rclone
+              mkdir -p ~/.config/rclone
+              # rclone 需要密码被 obscure 加密
+              OBSCURED_PASS=$(rclone obscure "$WEBDAV_PASSWORD")
+              cat > ~/.config/rclone/rclone.conf <<EOF
           [webdav]
           type = webdav
           url = $WEBDAV_URL
@@ -375,67 +321,49 @@ jobs:
           user = $WEBDAV_USERNAME
           pass = $OBSCURED_PASS
           EOF
-
-            echo "☁️  同步配置文件到 WebDAV 的 LyraIME 目录..."
-            echo "  目标: $WEBDAV_URL/LyraIME/"
-
-            # 2. 优先处理确定有更新的路径，进行强制覆写 (绕过体积校验)
-            if [ -s "$UPDATED_PATHS_FILE" ]; then
-              echo "  🚀 检测到部分资产有实质性版本更新，开始执行强制覆写..."
-              # 去重后逐行读取
-              sort -u "$UPDATED_PATHS_FILE" | while IFS= read -r upath; do
-                if [ -n "$upath" ] && [ -e "$upath" ]; then
-                  echo "    -> 强制上传: $upath"
-                  if [ -d "$upath" ]; then
-                    rclone copy "$upath" "webdav:LyraIME/$upath" --ignore-times -v
-                  else
-                    rclone copyto "$upath" "webdav:LyraIME/$upath" --ignore-times -v
+              chmod 600 ~/.config/rclone/rclone.conf
+              # 2. 优先处理确定有更新的路径，进行强制覆写 (绕过体积校验)
+              if [ -s "$UPDATED_PATHS_FILE" ]; then
+                # 去重后逐行读取
+                while IFS= read -r upath; do
+                  if [ -n "$upath" ] && [ -e "$upath" ]; then
+                    if [ -d "$upath" ]; then
+                      rclone copy "$upath" "webdav:LyraIME/$upath" --ignore-times -v
+                    else
+                      rclone copyto "$upath" "webdav:LyraIME/$upath" --ignore-times -v
+                    fi
                   fi
-                fi
-              done
+                done < <(sort -u "$UPDATED_PATHS_FILE")
+              fi
+              # 3. 使用 rclone sync 将当前目录文件同步到 WebDAV 的 LyraIME 文件夹
+              # 这一步负责接管常规上传和清理远端被删除的旧文件
+              # Sync generated fonts and their upstream notices.
+              rclone sync . webdav:LyraIME \
+                --exclude ".git/**" --exclude ".github/**" \
+                --exclude ".gitignore" --exclude "README.md" \
+                --exclude "/downloads/**" -v
+              rm -f ~/.config/rclone/rclone.conf
             fi
-
-            # 3. 使用 rclone sync 将当前目录文件同步到 WebDAV 的 LyraIME 文件夹
-            # 这一步负责接管常规上传和清理远端被删除的旧文件
-            rclone sync . webdav:LyraIME \
-              --exclude ".git/**" \
-              --exclude ".github/**" \
-              --exclude ".gitignore" \
-              --exclude "README.md" \
-              --exclude "downloads/" \
-              -v
-
-            echo "  ✅ WebDAV 同步完成！"
           fi
 
           # ============================================
           # 如果版本有更新，提交哈希记录到 Git
           # ============================================
           if [ "$HAS_UPDATE" = "true" ]; then
-            echo ""
-            echo "准备通过机器人提交哈希记录..."
-
             # 配置机器人的身份
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
             # 获取当前所在分支
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
             # 添加版本记录文件并提交 (如果没有改动则跳过，防止报错)
-            git add "$VERSIONS_FILE"
-            git diff --staged --quiet || git commit -m "chore: sync asset versions [skip ci]"
-
-            # 直接推送到当前触发的分支
-            echo "当前在 $CURRENT_BRANCH 分支，直接推送..."
-            git push origin "$CURRENT_BRANCH"
-
-            echo ""
-            echo "同步与提交完成。"
-          else
-            echo ""
-            echo "没有任何资产版本更新，跳过 Git 提交。"
+            git add -- "$VERSIONS_FILE"
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: sync asset versions [skip ci]"
+              # 直接推送到当前触发的分支
+              git push origin "$CURRENT_BRANCH"
+            fi
           fi
+          rm -f "$UPDATED_PATHS_FILE"
 
       # ============================================
       # Nightly Release 自动发布
@@ -449,23 +377,16 @@ jobs:
         run: |
           #!/bin/bash
           set -euo pipefail
-
-          echo "============================================"
-          echo "开始发布 Nightly Release"
-          echo "============================================"
-          echo ""
-
           # ============================================
           # 环境检查
           # ============================================
           CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          echo "当前分支: $CURRENT_BRANCH"
-
           if [ "$CURRENT_BRANCH" != "main" ]; then
-            echo "  ⚠️ 当前分支 ($CURRENT_BRANCH) 不是 main，跳过 Nightly Release 发布"
+            echo "Not main; skipping Nightly Release."
             exit 0
           fi
-
+          # 确保在仓库根目录
+          cd "$GITHUB_WORKSPACE"
           # ============================================
           # 准备发布信息
           # ============================================
@@ -478,128 +399,67 @@ jobs:
           RELEASE_ZIP="LyraIME-nightly.zip"
           VERSIONS_FILE=".github/sync/sha/versions.json"
 
-          echo "日期:   ${RELEASE_DATE}"
-          echo "时间:   ${RELEASE_TIME}"
-          echo "标签:   ${TAG_NAME}"
-          echo "名称:   ${RELEASE_NAME}"
-          echo "Commit: ${SHORT_SHA}"
-          echo "包名:   ${RELEASE_ZIP}"
-          echo ""
-
           # ============================================
           # 打包工作区文件
           # ============================================
-          echo "打包发布文件..."
-
-          # 确保在仓库根目录
-          cd "$GITHUB_WORKSPACE"
-
+          python3 .github/scripts/sync_fonts.py --verify-only
+          rm -f "$RELEASE_ZIP" "${RELEASE_ZIP}.sha256"
           zip -r "$RELEASE_ZIP" . \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x ".gitignore" \
-            -x "downloads/*" \
-            -x "*.zip" \
-            -x "LyraIME-nightly-*.zip" \
-            -x "*.sha256" \
-            > /dev/null
-
+            -x ".git/*" -x ".github/*" -x ".gitignore" \
+            -x "downloads/*" -x "*.zip" -x "*.sha256" > /dev/null
+          # Confirm the actual ZIP contains every font and its notice files.
+          python3 .github/scripts/sync_fonts.py --verify-zip "$RELEASE_ZIP"
           ZIP_SIZE=$(du -h "$RELEASE_ZIP" | cut -f1)
           ZIP_SHA256=$(sha256sum "$RELEASE_ZIP" | cut -d' ' -f1)
-          echo "包大小:   ${ZIP_SIZE}"
-          echo "SHA256:  ${ZIP_SHA256}"
-          echo ""
-
           # 生成校验和文件
-          echo "${ZIP_SHA256}  ${RELEASE_ZIP}" > "${RELEASE_ZIP}.sha256"
-
+          printf '%s  %s\n' "$ZIP_SHA256" "$RELEASE_ZIP" > "${RELEASE_ZIP}.sha256"
+          # 统计包内文件数量
+          FILE_COUNT=$(unzip -l "$RELEASE_ZIP" | tail -n 1 | awk '{print $2}')
           # ============================================
           # 生成 Release Notes
           # ============================================
-          echo "生成 Release Notes..."
-
-          NOTES_FILE=$(mktemp)
-
           # 读取资产版本信息
-          if [ -f "$VERSIONS_FILE" ]; then
-            ASSET_VERSIONS=$(cat "$VERSIONS_FILE" | jq -r 'to_entries | map("  - \(.key): \(.value)") | join("\n")' 2>/dev/null || echo "  (无法读取版本信息)")
-          else
-            ASSET_VERSIONS="  (无版本记录文件)"
-          fi
-
-          # 统计包内文件数量
-          FILE_COUNT=$(unzip -l "$RELEASE_ZIP" | tail -n 1 | awk '{print $2}')
-
+          ASSET_VERSIONS=$(jq -r 'to_entries | map("- \(.key): \(.value)") | join("\n")' "$VERSIONS_FILE")
+          FONT_VERSIONS=$(jq -r '.sources[] | "- \(.id): \(.resolved_ref) / \(.commit[0:12])\n  Files: \([.files[].name] | join(", "))"' themes/fonts/FONT_SOURCES.json)
+          NOTES_FILE=$(mktemp)
           cat > "$NOTES_FILE" <<NOTESEOF
           ## Nightly Build
 
-          | 项目 | 值 |
-          |------|-----|
-          | **构建日期** | ${RELEASE_DATE} |
-          | **构建时间** | ${RELEASE_TIME} (UTC) |
-          | **Commit** | \`${SHORT_SHA}\` |
-          | **Commit Message** | ${COMMIT_MSG} |
-          | **分支** | ${CURRENT_BRANCH} |
-          | **文件数量** | ${FILE_COUNT} |
-          | **包大小** | ${ZIP_SIZE} |
+          | Item | Value |
+          |------|-------|
+          | Build date | ${RELEASE_DATE} |
+          | Build time | ${RELEASE_TIME} (UTC) |
+          | Commit | \`${SHORT_SHA}\` |
+          | Commit message | ${COMMIT_MSG} |
+          | Branch | ${CURRENT_BRANCH} |
+          | File count | ${FILE_COUNT} |
+          | ZIP size | ${ZIP_SIZE} |
 
-          ### 资产版本
-
+          ### Asset versions
           ${ASSET_VERSIONS}
 
-          ### 校验信息
+          ### Included fonts
+          ${FONT_VERSIONS}
 
-          \`\`\`
-          SHA256: ${ZIP_SHA256}
-          \`\`\`
+          Fonts and upstream notices are included under \`themes/fonts/\`.
 
-          ---
-          > ⚠️ 这是自动构建的 nightly 版本，可能包含未完成的功能或 bug。
-          > 如需稳定版本，请查看 [Releases](https://github.com/${GITHUB_REPOSITORY}/releases/latest) 页面。
-          >
-          > 此 Nightly Release 每天自动更新，指向最新构建。
+          ### SHA-256
+          \`$ZIP_SHA256\`
+
+          This automated nightly build may contain unfinished features or bugs.
           NOTESEOF
-
-          echo "  ✅ Release Notes 已生成"
-          echo ""
-
           # ============================================
           # 删除旧的 Nightly Release
           # ============================================
-          echo "清理旧的 Nightly Release..."
-
           if gh release view "$TAG_NAME" > /dev/null 2>&1; then
-            echo "发现旧版本，正在删除..."
             gh release delete "$TAG_NAME" --yes --cleanup-tag
-            echo "旧版本已清理"
-          else
-            echo "无旧版本需要清理"
           fi
-          echo ""
-
           # ============================================
           # 创建新的 Nightly Release
           # ============================================
-          echo "创建新的 Nightly Release..."
-
           gh release create "$TAG_NAME" \
-            --target main \
-            --title "$RELEASE_NAME" \
-            --notes-file "$NOTES_FILE" \
-            --prerelease \
-            "$RELEASE_ZIP" \
-            "${RELEASE_ZIP}.sha256"
-
-          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG_NAME}"
-
-          echo ""
-          echo "============================================"
-          echo "Nightly Release 发布完成！"
-          echo "============================================"
-          echo "Release URL: ${RELEASE_URL}"
-          echo "下载文件: ${RELEASE_ZIP} (${ZIP_SIZE})"
-          echo "SHA256: ${ZIP_SHA256}"
-          echo ""
-
+            --target "$(git rev-parse HEAD)" \
+            --title "$RELEASE_NAME" --notes-file "$NOTES_FILE" \
+            --prerelease "$RELEASE_ZIP" "${RELEASE_ZIP}.sha256"
           # 清理临时文件
           rm -f "$NOTES_FILE"
