@@ -1,8 +1,3 @@
-local font_combo = {
-  "LXGW975YuanSC-400W.ttf", "OpenMoji.ttf", "CarlsonFont.ttf",
-  "WenJinMinchoP0-Regular.otf", "WenJinMinchoP2-Regular.otf", "WenJinMinchoP3-Regular.otf"
-}
-
 -- ========================================================================
 -- 全局样式 (GeneralStyle)
 -- 每个属性后注释说明其类型和用途，可注释掉使用默认值
@@ -70,30 +65,22 @@ local gs = style {
 
   -- 字体/字号
   fonts = {
-    candidate = font_combo,
+    font_list = {
+      "LXGWZhenKaiSlabGB-Regular.ttf", "CarlsonFont.ttf",
+      "OpenMoji-color-colr0_svg.ttf", "SourceHanSansSC-Regular.otf",
+      "PlangothicP1-Regular.otf", "PlangothicP2-Regular.otf"
+    },
     candidate_size = 19,
-    comment = font_combo,
     comment_size = 8,
-    key = font_combo,
     key_size = 19,
     key_long_size = 16,
-    label = font_combo,
     label_size = 22,
-    latin = font_combo,
-    symbol = font_combo,
     symbol_size = 10,
-    text = font_combo,
-    hint = font_combo,
     hint_size = 9,
-    hanb = font_combo,
-    popup = font_combo,
     popup_size = 20,
-    sidebar = font_combo,
     sidebar_size = 18,
     liquid_tabs_size = 16,
-    clipboard = font_combo,
     clipboard_size = 13,
-    clipboard_category = font_combo,
     clipboard_category_size = 14
   }
 }

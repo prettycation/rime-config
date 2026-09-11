@@ -15,9 +15,9 @@ local keyboard = keyboard {
     row {
       keys = {
         key(merge(S.lookup, key { click = "ReverseLookup", key_text_size = func_key_text_size, width = 0.11 })),
-        key(merge(S.e, key { label = { { text = "b \u{F82D}" } }, click = "q", label_symbol = { { text = { "B/A", " ", "\"" }, align = "justify" } }, swipe_up = "\"", popup = { "B", "A", "b", "a" }, key_text_size = main_key_text_size })),
-        key(merge(S.r, key { label = { { text = "p \u{F82E}" } }, click = "w", label_symbol = { { text = { "P/E", " ", "+" }, align = "justify" } }, swipe_up = "+", popup = { "P", "E", "p", "e" }, key_text_size = main_key_text_size })),
-        key(merge(S.t, key { label = { { text = "m \u{F82F}" } }, click = "e", label_symbol = { { text = { "M/O", " ", "-" }, align = "justify" } }, swipe_up = "-", popup = { "M", "O", "m", "o" }, swipe_down = "KeyboardEditor", key_text_size = main_key_text_size })),
+        key(merge(S.e, key { label = { { text = "b \u{F82A}" } }, click = "q", label_symbol = { { text = { "B/A", " ", "\"" }, align = "justify" } }, swipe_up = "\"", popup = { "B", "A", "b", "a" }, key_text_size = main_key_text_size })),
+        key(merge(S.r, key { label = { { text = "p \u{F82B}" } }, click = "w", label_symbol = { { text = { "P/E", " ", "+" }, align = "justify" } }, swipe_up = "+", popup = { "P", "E", "p", "e" }, key_text_size = main_key_text_size })),
+        key(merge(S.t, key { label = { { text = "m \u{F82C}" } }, click = "e", label_symbol = { { text = { "M/O", " ", "-" }, align = "justify" } }, swipe_up = "-", popup = { "M", "O", "m", "o" }, swipe_down = "KeyboardEditor", key_text_size = main_key_text_size })),
         key(merge(S.y, key { label = { { text = "r f" } }, click = "r", label_symbol = { { text = { "R/F", " ", ":" }, align = "justify" } }, swipe_up = ":", popup = { "R", "F", "r", "f" }, key_text_size = main_key_text_size })),
         key(merge(S.u, key { label = { { text = "v z" } }, click = "t", label_symbol = { { text = { "V/Z", " ", "\\" }, align = "justify" } }, swipe_up = "\\", popup = { "V", "Z", "v", "z" }, key_text_size = main_key_text_size })),
         key(merge(S.up, key { click = "Up", key_text_size = func_key_text_size, width = 0.11 }))
@@ -25,7 +25,7 @@ local keyboard = keyboard {
     },
     row {
       keys = {
-        key(merge(S.slash, key { click = "/", key_text_size = func_key_text_size, width = 0.11 })),
+        key(merge(S.slash, key { click = "@", key_text_size = func_key_text_size, width = 0.11 })),
         key(merge(S.d, key { label = { { text = "d" } }, click = "a", label_symbol = { { text = { "D", "一", "<" }, align = "justify", color = { "text", "mauve", "text" } } }, swipe_up = "<", popup = { "D", "d" }, swipe_down = "H", key_text_size = main_key_text_size })),
         key(merge(S.f, key { label = { { text = "t" } }, click = "s", label_symbol = { { text = { "T", "丨", "=" }, align = "justify", color = { "text", "mauve", "text" } } }, swipe_up = "=", popup = { "T", "t" }, swipe_down = "S", key_text_size = main_key_text_size })),
         key(merge(S.g, key { label = { { text = "n" } }, click = "d", label_symbol = { { text = { "N", "丿", ">" }, align = "justify", color = { "text", "mauve", "text" } } }, swipe_up = ">", popup = { "N", "n" }, swipe_down = "P", key_text_size = main_key_text_size })),
