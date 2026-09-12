@@ -132,8 +132,9 @@ class IntegrationTests(unittest.TestCase):
             def blob(path, data):
                 tree.append({"path": path, "type": "blob", "size": len(data), "sha": sf.git_sha(data)})
                 self.responses[f"https://raw.githubusercontent.com/{repo}/{self.commit}/{path}"] = data
-            license_path = source["license_candidates"][0]
-            blob(license_path, (source["license_marker"] + "\nSynthetic test notice\n").encode())
+            if source.get("license_candidates"):
+                license_path = source["license_candidates"][0]
+                blob(license_path, (source.get("license_marker", "") + "\nSynthetic test notice\n").encode())
             ref = source["ref"]
             if source["kind"] == "git":
                 for spec in source["files"]:
@@ -187,7 +188,7 @@ class IntegrationTests(unittest.TestCase):
         self.run_main()
         self.assertFalse(json.loads(Path("result.json").read_text())["changed"])
         self.assertEqual(len([u for u in self.urls if not u.startswith("https://api.")]), download_count)
-        self.assertTrue(Path("themes/fonts/upstream-licenses/carlsonfont/app/assets/fonts/NOTICE.txt").exists())
+        self.assertTrue(Path("themes/fonts/upstream-licenses/carlsonfont/themes/fonts/NOTICE.txt").exists())
         self.assertTrue(Path("themes/fonts/upstream-licenses/plangothic/release-archive/bundle/NOTICE.txt").exists())
         self.assertEqual(len(list(Path("themes/fonts").glob("*.ttf"))) + len(list(Path("themes/fonts").glob("*.otf"))), 6)
 
@@ -222,7 +223,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertFalse(Path("themes/fonts").exists())
 
     def test_mismatched_license_fails(self):
-        source = self.config["sources"][0]
+        source = next(s for s in self.config["sources"] if s.get("require_license", True))
         source["license_marker"] = "A license which is not present"
         sf.write_json(Path(".github/sync/fonts.json"), self.config)
         with self.assertRaises(ValueError):
@@ -254,7 +255,9 @@ class IntegrationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             sf.verify(Path("themes/fonts"), self.theme)
         font.write_bytes(original)
-        notice = next(Path("themes/fonts/upstream-licenses/carlsonfont").glob("LICENSE*"))
+        notice = next(Path("themes/fonts/upstream-licenses/carlsonfont").rglob("*"))
+        while notice.is_dir():
+            notice = next(notice.rglob("*"))
         notice.write_bytes(b"tampered")
         with self.assertRaises(ValueError):
             sf.verify(Path("themes/fonts"), self.theme)

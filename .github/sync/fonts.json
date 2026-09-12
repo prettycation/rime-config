@@ -3,15 +3,21 @@
   "sources": [
     {
       "id": "carlsonfont",
-      "repository": "Carlson24/LyraIME",
+      "repository": "Carlson24/rime-config",
       "kind": "git",
-      "ref": "lyraime",
-      "files": [{"name": "CarlsonFont.ttf"}],
-      "license_label": "See LyraIME upstream notices; repository license: GPL-3.0",
-      "license_candidates": ["LICENSE", "LICENSE.txt", "COPYING"],
-      "license_marker": "GNU GENERAL PUBLIC LICENSE",
-      "attribution": "Carlson24 (\u9e64\u8854\u6625\u96ea)",
-      "note": "Includes the LyraIME repository license and available font-embedded or adjacent notices."
+      "ref": "master",
+      "files": [
+        {
+          "name": "CarlsonFont.ttf",
+          "path": "themes/fonts/CarlsonFont.ttf"
+        }
+      ],
+      "license_label": "See upstream font metadata and source attribution",
+      "license_candidates": [],
+      "license_marker": "",
+      "attribution": "Carlson24 (鹤衔春雪)",
+      "note": "Carlson24 custom font from Carlson24/rime-config; preserve embedded font metadata and source attribution.",
+      "require_license": false
     },
     {
       "id": "lxgw-zhenkai",
@@ -20,9 +26,17 @@
       "ref": "latest",
       "asset_pattern": "LXGWZhenKaiSlabGB-Regular\\.ttf",
       "archive": false,
-      "files": [{"name": "LXGWZhenKaiSlabGB-Regular.ttf"}],
+      "files": [
+        {
+          "name": "LXGWZhenKaiSlabGB-Regular.ttf"
+        }
+      ],
       "license_label": "OFL-1.1",
-      "license_candidates": ["OFL.txt", "LICENSE", "LICENSE.txt"],
+      "license_candidates": [
+        "OFL.txt",
+        "LICENSE",
+        "LICENSE.txt"
+      ],
       "license_marker": "SIL OPEN FONT LICENSE",
       "attribution": "LXGW and the upstream copyright holders"
     },
@@ -31,9 +45,18 @@
       "repository": "adobe-fonts/source-han-sans",
       "kind": "git",
       "ref": "release",
-      "files": [{"name": "SourceHanSansSC-Regular.otf", "path": "OTF/SimplifiedChinese/SourceHanSansSC-Regular.otf"}],
+      "files": [
+        {
+          "name": "SourceHanSansSC-Regular.otf",
+          "path": "OTF/SimplifiedChinese/SourceHanSansSC-Regular.otf"
+        }
+      ],
       "license_label": "OFL-1.1",
-      "license_candidates": ["LICENSE.txt", "OFL.txt", "LICENSE"],
+      "license_candidates": [
+        "LICENSE.txt",
+        "OFL.txt",
+        "LICENSE"
+      ],
       "license_marker": "SIL OPEN FONT LICENSE",
       "attribution": "Adobe and the upstream copyright holders"
     },
@@ -44,9 +67,21 @@
       "ref": "latest",
       "asset_pattern": "(?i).*OTF.*\\.zip",
       "archive": true,
-      "files": [{"name": "PlangothicP1-Regular.otf"}, {"name": "PlangothicP2-Regular.otf"}],
+      "files": [
+        {
+          "name": "PlangothicP1-Regular.otf"
+        },
+        {
+          "name": "PlangothicP2-Regular.otf"
+        }
+      ],
       "license_label": "OFL-1.1",
-      "license_candidates": ["LICENSE-OFL.txt", "OFL.txt", "LICENSE", "LICENSE.txt"],
+      "license_candidates": [
+        "LICENSE-OFL.txt",
+        "OFL.txt",
+        "LICENSE",
+        "LICENSE.txt"
+      ],
       "license_marker": "SIL OPEN FONT LICENSE",
       "attribution": "Plangothic Project contributors and the upstream copyright holders"
     },
@@ -55,9 +90,18 @@
       "repository": "hfg-gmuend/openmoji",
       "kind": "git",
       "ref": "master",
-      "files": [{"name": "OpenMoji-color-colr0_svg.ttf", "path": "font/OpenMoji-color-colr0_svg/OpenMoji-color-colr0_svg.ttf"}],
+      "files": [
+        {
+          "name": "OpenMoji-color-colr0_svg.ttf",
+          "path": "font/OpenMoji-color-colr0_svg/OpenMoji-color-colr0_svg.ttf"
+        }
+      ],
       "license_label": "CC-BY-SA-4.0",
-      "license_candidates": ["LICENSE.txt", "LICENSE", "LICENSE.md"],
+      "license_candidates": [
+        "LICENSE.txt",
+        "LICENSE",
+        "LICENSE.md"
+      ],
       "license_marker": "Attribution-ShareAlike 4.0",
       "attribution": "OpenMoji (https://openmoji.org), HfG Schwaebisch Gmuend and contributors",
       "note": "Redistributed unchanged under CC-BY-SA-4.0."

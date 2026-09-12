@@ -283,13 +283,14 @@ def build_source(net: Network, source: dict, stage: Path) -> dict:
         record["files"].append(item)
     # Preserve matching upstream licenses at the resolved source revision.
     # Checking the marker prevents accidentally using Plangothic's MIT code license.
-    candidates = [e for e in entries if e.get("type") == "blob" and e["path"] in source["license_candidates"]]
+    candidates = [e for e in entries if e.get("type") == "blob" and e["path"] in source.get("license_candidates", [])]
     selected: dict[str, tuple[dict, bytes, str]] = {}
+    marker = source.get("license_marker", "")
     for entry in candidates:
         data, url = raw_file(net, repo, commit, entry)
-        if source["license_marker"].casefold() in data.decode("utf-8", errors="replace").casefold():
+        if not marker or marker.casefold() in data.decode("utf-8", errors="replace").casefold():
             selected[entry["path"]] = (entry, data, url)
-    if not selected:
+    if source.get("require_license", True) and not selected:
         raise ValueError(f"No matching upstream license for {repo}@{commit}")
     for entry in entries:
         if (entry.get("type") == "blob" and
