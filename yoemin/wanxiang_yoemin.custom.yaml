@@ -1,4 +1,8 @@
 patch:
+  "speller/algebra/+":
+    # 前两码简拼
+    - abbrev/^([qwertasdfgzxcvbyhn]{2})[qwertasdfgzxcvb]$/$1/
+
   grammar:
     __include: shared_config.yaml:/grammar
 
