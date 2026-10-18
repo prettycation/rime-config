@@ -1,10 +1,10 @@
 {
   "moegirl.pro.dict.yaml": "4d01edc482b2e805ad57d1f98cbc56b53a4fd466",
-  "momo-dicts-pro": "7ec2b0fe0a1928bd94b3b0ec42f07a991cf409eb",
+  "momo-dicts-pro": "ac9e4696e9f9edc03ba1b72ad5ae9fdefb785696",
   "moqi_moe.dict.yaml": "sha256:88c8fdfa77e56e331b8c462fa4ccec9f12ed0f08eb4c78eecfe1fb07cf238fae",
   "pro-moqi-fuzhu-dicts": "sha256:71a51c110c5dcae1e5005877dff9ed93a8aa5d0dc8e0e3dbd0492b3118ef040e",
-  "rime-wanxiang-moqi-fuzhu": "sha256:2601961eef570c62e7c3c94bbfc0ae86c525f59644eb58e161b4de969af2ea5b",
-  "theme-fonts": "sha256:e47d676754c271d69550dd634352827e50ae0c924ea6f45ac9575537efbcac0e",
-  "wanxiang-lts-zh-hans.gram": "sha256:20f968dfe5dc461d23c355b93aa63925d6d36a5fb8f459ccd5c4dcd1cae6e6b9",
+  "rime-wanxiang-moqi-fuzhu": "sha256:533cc710d20c891e3c418b9adeb25cd435f73efc766860d52ad502eeeb38e5cd",
+  "theme-fonts": "sha256:74bebf96bbe75b1103b9b98724619baf67643a8a0a7c0e7d8cd395395c3883ee",
+  "wanxiang-lts-zh-hans.gram": "sha256:1849e5e4acbdbfaf41fceeb86b739d5d0c85d574bd8a688562cba1e6beb78488",
   "wanxiang_yoemin": "f7ab5046879cf5bee5c5afdfdbf536b6fdfe2eb8"
 }
