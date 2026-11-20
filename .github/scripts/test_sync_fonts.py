@@ -11,7 +11,7 @@ import struct
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import zipfile
 
 import sync_fonts as sf
@@ -108,6 +108,62 @@ class BasicTests(unittest.TestCase):
                 result, url = sf.raw_file(net, "example/repo", "a" * 40, entry)
             self.assertEqual(result, font)
             self.assertIn("media.githubusercontent.com", url)
+
+
+class ReleaseSelectionTests(unittest.TestCase):
+    repo = "lxgw/LxgwZhenKai"
+    pattern = r"LXGWZhenKaiSlabGB-Regular\.ttf"
+
+    def setUp(self):
+        self.latest = {"tag_name": "v0.828", "assets": [], "published_at": "2026-11-17T00:00:00Z"}
+        self.previous = {"tag_name": "v0.827", "assets": [{"name": "LXGWZhenKaiSlabGB-Regular.ttf"}],
+                         "published_at": "2026-10-13T00:00:00Z"}
+        self.net = Mock()
+        self.net.api.return_value = self.latest
+        self.net.api_list.return_value = [self.latest, self.previous]
+
+    def test_fallback_to_last_stable_release_with_asset(self):
+        with contextlib.redirect_stdout(io.StringIO()) as log:
+            release, asset = sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+        self.assertEqual(release["tag_name"], "v0.827")
+        self.assertEqual(asset["name"], "LXGWZhenKaiSlabGB-Regular.ttf")
+        self.assertIn("::warning::", log.getvalue())
+
+    def test_automatically_uses_latest_after_asset_uploaded(self):
+        self.latest["assets"] = self.previous["assets"]
+        release, _ = sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+        self.assertEqual(release["tag_name"], "v0.828")
+        self.net.api_list.assert_not_called()
+
+    def test_pinned_release_never_falls_back(self):
+        with self.assertRaisesRegex(ValueError, "no release asset"):
+            sf.select_release_asset(self.net, self.repo, "v0.828", self.pattern)
+        self.net.api_list.assert_not_called()
+
+    def test_skips_drafts_prereleases_and_newer_releases(self):
+        unreleased = {**self.previous, "tag_name": "v0.827-rc", "prerelease": True}
+        draft = {**self.previous, "tag_name": "v0.827-draft", "draft": True}
+        newer = {**self.previous, "tag_name": "v0.829", "published_at": "2026-11-18T00:00:00Z"}
+        self.net.api_list.return_value = [self.latest, unreleased, draft, newer, self.previous]
+        release, _ = sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+        self.assertEqual(release["tag_name"], "v0.827")
+
+    def test_duplicate_matching_assets_are_not_silently_ignored(self):
+        self.previous["assets"].append({"name": "LXGWZhenKaiSlabGB-Regular.ttf"})
+        with self.assertRaisesRegex(ValueError, "found 2"):
+            sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+
+    def test_fails_if_no_release_has_matching_asset(self):
+        self.net.api_list.return_value = [self.latest]
+        with self.assertRaisesRegex(ValueError, "no stable release"):
+            sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+
+    def test_checks_next_page_when_needed(self):
+        missing = [{"tag_name": f"v0.{n}", "assets": []} for n in range(100)]
+        self.net.api_list.side_effect = [missing, [self.previous]]
+        release, _ = sf.select_release_asset(self.net, self.repo, "latest", self.pattern)
+        self.assertEqual(release["tag_name"], "v0.827")
+        self.assertEqual(self.net.api_list.call_count, 2)
 
 
 class IntegrationTests(unittest.TestCase):

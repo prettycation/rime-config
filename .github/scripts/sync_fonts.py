@@ -161,6 +161,12 @@ class Network:
             raise ValueError(f"Unexpected GitHub response for {path}: {value}")
         return value
 
+    def api_list(self, path: str) -> list[dict]:
+        value = json.loads(self.request("https://api.github.com/" + path, api=True))
+        if not isinstance(value, list) or any(not isinstance(item, dict) for item in value):
+            raise ValueError(f"Unexpected GitHub release list for {path}: {value}")
+        return value
+
     def download(self, url: str, identity: str, *, blob_sha: str = "", digest: str = "") -> bytes:
         key = sha256(identity.encode())
         dest = self.cache / (key + ".bin")
@@ -226,6 +232,46 @@ def archive_member(data: bytes, name: str) -> tuple[bytes, str]:
         return archive.read(entry), entry.filename
 
 
+def select_release_asset(net: Network, repo: str, requested: str, pattern: str) -> tuple[dict, dict]:
+    """Resolve a release, falling back only when latest lacks the requested asset."""
+    endpoint = "latest" if requested == "latest" else "tags/" + quote(requested, safe="")
+    latest = net.api(f"repos/{repo}/releases/{endpoint}")
+
+    def matching_asset(release: dict) -> dict | None:
+        matches = [a for a in release["assets"] if re.fullmatch(pattern, a["name"])]
+        if len(matches) > 1:
+            raise ValueError(f"{repo}@{release['tag_name']}: expected one release asset matching {pattern!r}; found {len(matches)}")
+        return matches[0] if matches else None
+
+    asset = matching_asset(latest)
+    if asset is not None:
+        return latest, asset
+
+    if requested != "latest":
+        raise ValueError(f"{repo}@{requested}: no release asset matching {pattern!r}")
+
+    # GitHub lists releases newest first. Ignore drafts and prereleases, and
+    # do not conceal ambiguous asset matches or GitHub API failures.
+    for page in range(1, 11):
+        releases = net.api_list(f"repos/{repo}/releases?per_page=100&page={page}")
+        for candidate in releases:
+            if (candidate["tag_name"] == latest["tag_name"] or
+                candidate.get("draft") or candidate.get("prerelease")):
+                continue
+            if (latest.get("published_at") and candidate.get("published_at") and
+                candidate["published_at"] > latest["published_at"]):
+                continue
+            asset = matching_asset(candidate)
+            if asset is not None:
+                print(f"::warning::{repo}: latest release {latest['tag_name']} lacks {pattern!r}; "
+                      f"using {candidate['tag_name']} until the asset is published")
+                return candidate, asset
+        if len(releases) < 100:
+            break
+    raise ValueError(f"{repo}: no stable release with an asset matching {pattern!r} "
+                     f"(checked latest and up to 1000 release entries)")
+
+
 def build_source(net: Network, source: dict, stage: Path) -> dict:
     repo, requested = source["repository"], source["ref"]
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
@@ -233,13 +279,8 @@ def build_source(net: Network, source: dict, stage: Path) -> dict:
     release, asset, payload = None, None, None
     resolved_ref = requested
     if source["kind"] == "release":
-        endpoint = "latest" if requested == "latest" else "tags/" + quote(requested, safe="")
-        release = net.api(f"repos/{repo}/releases/{endpoint}")
+        release, asset = select_release_asset(net, repo, requested, source["asset_pattern"])
         resolved_ref = release["tag_name"]
-        matches = [a for a in release["assets"] if re.fullmatch(source["asset_pattern"], a["name"])]
-        if len(matches) != 1:
-            raise ValueError(f"{repo}: expected one release asset matching {source['asset_pattern']!r}; found {len(matches)}")
-        asset = matches[0]
     elif source["kind"] != "git":
         raise ValueError(f"Unsupported source kind: {source['kind']}")
     commit = net.api(f"repos/{repo}/commits/{quote(resolved_ref, safe='')}")["sha"]
