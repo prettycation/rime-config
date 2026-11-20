@@ -86,6 +86,7 @@ Nightly 是滚动更新的预发布版本：同一个 `nightly` 标签会被重�
 ├── shared/
 │   ├── shared_config.yaml              # 可复用配置片段
 │   ├── wan.extended.dict.yaml          # 共享扩展词典入口
+│   ├── wan.abbrev.dict.yaml            # 简码词典入口
 │   ├── dicts/                          # Pro 词库；构建时补齐
 │   ├── dicts_zian/                     # 尖音系列词库；构建时补齐
 │   ├── dicts_extra/                    # 额外词库
@@ -93,6 +94,7 @@ Nightly 是滚动更新的预发布版本：同一个 `nightly` 标签会被重�
 ├── wanxiang/
 │   ├── default.custom.yaml             # 启用方案、候选数量等
 │   ├── wanxiang_pro.custom.yaml        # 万象 Pro 个人定制
+│   ├── wanxiang_abbrev.custom.yaml     # 简码方案拼写与词典配置
 │   ├── wanxiang_english.custom.yaml    # 万象英文定制
 │   └── …                              # 上游方案与配套资源；构建补齐
 ├── yoemin/
@@ -147,6 +149,8 @@ patch:
 | 提示类型     | 不加载化学式与车牌类提示规则                           |
 
 主翻译器与两处造词翻译器统一指向 `wan.extended`：修改词典入口时，需要一起检查 `translator/dictionary`、`user_dict_set/dictionary` 与 `add_user_dict/dictionary`，避免查询和造词使用不同词典。
+
+简码翻译器的 `dictionary` 与 `prism` 均指向 `wan.abbrev`。该词典从 `shared/dicts/custom_phrase.dict.yaml` 导入固定简码；`wanxiang_abbrev.custom.yaml` 使用上游的 `26jian` 拼写规则。
 
 这些设置以本仓库补丁及其匹配的上游方案为准；`switches/@数字` 依赖上游列表顺序，更新后应核对实际开关，不能只看旧注释。
 
@@ -221,7 +225,7 @@ patch:
 
 短语文件名应与最终的 `custom_phrase/user_dict` 一致，不含 `.txt` 后缀。
 
-当前共享片段使用 `user_phrase`，Pro 补丁中还存在指向 `custom_phrase01` 的单独设置。维护时应统一这两处定义，并在部署后的 `build/*.schema.yaml` 中核对最终值；不能仅凭目录里存在 `custom_phrase.txt` 就认定该文件正在生效。
+当前共享片段使用 `user_phrase`，Pro 补丁沿用这一设置。简码使用独立的 `wan.abbrev` 固定词典；修改简码条目应编辑 `shared/dicts/custom_phrase.dict.yaml`，不要将其当作 `custom_phrase/user_dict` 文本文件。
 
 确定最终值后，在当前方案的用户目录中创建对应的 UTF-8 文本文件。示例内容如下，列之间使用实际的 Tab：
 
