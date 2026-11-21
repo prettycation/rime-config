@@ -2,6 +2,8 @@
 local S = safe_require("nekocat.colors._key_colors")
 local func_key_text_size = safe_require("nekocat.font_offset").func_key_text_size
 
+local action_rows = safe_require("nekocat.layouts._action_row")({ mode_switch = true })
+
 local keyboard = keyboard {
   name = "7 列布局",
   author = "Carlson24(鹤衔春雪)",
@@ -53,7 +55,8 @@ local keyboard = keyboard {
         key(merge(S.backspace, key { click = "BackSpace", key_text_size = func_key_text_size }))
       }
     },
-    safe_require("nekocat.layouts._action_row")({ mode_switch = true }).action
+    action_rows.action,
+    action_rows.extra
   }
 }
 
