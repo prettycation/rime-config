@@ -11,7 +11,7 @@ local theme = theme {
   author = "Carlson24(鹤衔春雪)",
 
   style = merge(safe_require("nekocat.generalstyle"), style {
-    keyboard_height = 295,      -- [int] 竖屏键盘高度 (px)
+    keyboard_height = 285,      -- [int] 竖屏键盘高度 (px)
     keyboard_height_land = 150, -- [int] 横屏键盘高度 (px)
     candidate_view_height = 40  -- [int] 候选区高度
   }),
@@ -22,6 +22,8 @@ local theme = theme {
 
   preedit = safe_require("nekocat.preedit"),
 
+  sync_input = safe_require("nekocat.sync_input"),
+
   window = safe_require("nekocat.candidates_windows"),
 
   candidates_tool = safe_require("nekocat.candidates_tool"),
@@ -30,7 +32,9 @@ local theme = theme {
 
   preset_keys = safe_require("nekocat.preset_keys"),
 
-  preset_keyboards = safe_require("nekocat.textkeyboard"),
+  preset_keyboards = merge(safe_require("nekocat.textkeyboard"), {
+    wanxiang_flypy = safe_require("nekocat.layouts.47keys_hint_flypy")
+  }),
 
   liquid_keyboard = safe_require("nekocat.liquid_keyboard")
 }

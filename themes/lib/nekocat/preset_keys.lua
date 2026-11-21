@@ -52,6 +52,7 @@ local pk = {
   IMESwitch          = { label = "ic@web", send = "LANGUAGE_SWITCH" },                                                                             -- 输入法切换
   OpenLogcat         = { label = "ic@information-outline", command = "run", option = "com.carlson.lyraime/com.osfans.trime.ui.main.LogActivity" }, -- LogCat
   ZiTools            = { label = "ic@ideogram-cjk", command = "run", option = "https://zi.tools/zi/%1$s" },                                        -- 字统网查字
+  FlypyIX            = { label = "ic@ideogram-cjk", command = "run", option = "https://flypy.cc/ix/?q=%1$s" },                                     -- 小鹤拆字查询
 
   -- 编辑键
   SelectAll          = { label = "ic@select-all", send = "Control+a" },    -- 全选
@@ -76,13 +77,10 @@ local pk = {
   KeyboardEditor     = { label = "ic@square-edit-outline", send = "Eisu_toggle", select = "editor" },    -- 编辑键盘
   KeyboardNumber     = { label = "ic@numeric", send = "Eisu_toggle", select = "number" },                -- 数字键盘
   KeyboardSettings   = { label = "ic@cogs", send = "Eisu_toggle", select = "settings" },                 -- 设置键盘
-  KeyboardLayouts    = { label = "ic@keyboard-variant", send = "Eisu_toggle", select = "layouts" },      -- 布局界面
   Keyboard45Eng      = { label = "\u{F840}", send = "Eisu_toggle", select = "english" },                 -- 英文布局
   KeyboardT9Number   = { label = "ic@numeric", send = "Eisu_toggle", select = "t9_number" },             -- T9 用数字
-  Keyboardzrm        = { label = "\u{F842}", send = "Eisu_toggle", select = "wanxiang_zrm" },            -- 自然码布局
-  Keyboardzrm18keys  = { label = "\u{F844}", send = "Eisu_toggle", select = "wanxiang_zrm_18keys" },     -- 自然码 18 键
-  Keyboardzrm14keys  = { label = "\u{F846}", send = "Eisu_toggle", select = "wanxiang_zrm_14keys" },     -- 自然码 14 键
   Keyboardl17keys    = { label = "\u{F845}", send = "Eisu_toggle", select = "wanxiang_l17keys" },        -- 乱序 17
+  Keyboard7columns   = { label = "\u{F842}", send = "Eisu_toggle", select = "wanxiang_flypy_26keys" },   -- 小鹤 7 列布局
 
   -- 方案切换
   SchemaEnglish      = { label = "\u{F840}", command = "set_schema", option = "wanxiang_english" },      -- 万象英文
@@ -120,6 +118,10 @@ local pk = {
   SelectCandThree    = { label = { { text = "〣", align = "left" } }, send = "3" }, -- 选择第三个候选
   SelectCandFour     = { label = { { text = "〤", align = "left" } }, send = "4" }, -- 选择第四个候选
   SelectCandFive     = { label = { { text = "〥", align = "left" } }, send = "5" }, -- 选择第五个候选
+  SelectCandSix      = { label = { { text = "〦", align = "left" } }, send = "6" }, -- 选择第六个候选
+  SelectCandSeven    = { label = { { text = "〧", align = "left" } }, send = "7" }, -- 选择第七个候选
+  SelectCandEight    = { label = { { text = "〨", align = "left" } }, send = "8" }, -- 选择第八个候选
+  SelectCandNine     = { label = { { text = "〩", align = "left" } }, send = "9" }, -- 选择第九个候选
   SelectToneOne      = { label = { { text = "\u{F821}", align = "left" } }, send = "6" }, -- 音调一声
   SelectToneTwo      = { label = { { text = "\u{F822}", align = "left" } }, send = "7" }, -- 音调二声
   SelectToneThree    = { label = { { text = "\u{F823}", align = "left" } }, send = "8" }, -- 音调三声
