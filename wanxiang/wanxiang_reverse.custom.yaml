@@ -1,0 +1,5 @@
+patch:
+  speller/algebra:
+    __patch:
+      - wanxiang_algebra:/reverse/小鹤双拼
+      - wanxiang_algebra:/reverse/hspzn
